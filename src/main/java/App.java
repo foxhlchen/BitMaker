@@ -41,6 +41,14 @@ public class App {
         reactor.publish(q);
         reactor.publish(t);
 
+        WebSocketService service = new WebSocketServiceImpl();
+
+        //WebSocket客户端
+        WebSoketClient client = new WebSoketClient(url,service);
+        client.start();
+
+
+
         reactor.join();
     }
 }
