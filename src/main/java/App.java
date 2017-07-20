@@ -1,63 +1,54 @@
-
-
-import com.okcoin.websocket.WebSocketService;
-import com.okcoin.websocket.test.WebSoketClient;
-import com.qidianai.bitmaker.event.EvQuote;
-import com.qidianai.bitmaker.event.EvTest;
-import com.qidianai.bitmaker.eventsys.Event;
-import com.qidianai.bitmaker.eventsys.Handler;
 import com.qidianai.bitmaker.eventsys.Reactor;
+import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.logging.Logger;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 
 public class App {
-    Logger logger = Logger.getLogger(getClass().getName());
+    private Logger log = LogManager.getLogger(getClass().getName());
 
-    public void run(){
-        logger.info("test");
-    }
 
     public static void main(String[] args) {
-        Handler handler = new Handler() {
-            @Override
-            public void handle(Event ev) {
-                System.out.println(ev);
-                System.out.println(ev.getData());
+        if (args.length != 2) {
+            System.out.println("usage: " + args[0] + " <config file>");
+            System.exit(-1);
+        }
+
+
+        try {
+            Properties prop = new Properties();
+            InputStream configfile = new FileInputStream(args[1]);
+
+            prop.load(configfile);
+
+            //okcoin client config
+            String apiKey = prop.getProperty("okcoin.apikey");
+            String secretKey = prop.getProperty("okcoin.secretKey");
+            String okcoin_url = prop.getProperty("okcoin.websocket.url", null);
+
+            OKCoinClient marketClient = new OKCoinClient(apiKey, secretKey);
+            if (okcoin_url != null) {
+                marketClient.setUrl(okcoin_url);
             }
-        };
 
-        EvQuote q = new EvQuote();
-        EvTest t = new EvTest();
-
-        q.setData(t);
-
-        Reactor reactor = new Reactor();
+            marketClient.connect();
+            marketClient.subTickerEth();
+            marketClient.subTradesEth();
 
 
-        reactor.start();
+            Reactor reactor = new Reactor();
+            reactor.start();
+            reactor.join();
 
-        reactor.register(EvQuote.class, handler);
-        reactor.register(EvTest.class, handler);
+        } catch (IOException e) {
+            System.out.println("Error while loading configuration file: " + e.getMessage());
+        }
 
-
-        //reactor.publish(q);
-        //reactor.publish(t);
-
-        String url = "wss://real.okcoin.cn:10440/websocket/okcoinapi";
-
-        WebSocketService service = new WebSocketService() {
-            @Override
-            public void onReceive(String msg) {
-                System.out.println(msg);
-            }
-        };
-
-        //WebSocket客户端
-        WebSoketClient client = new WebSoketClient(url, service);
-        client.start();
-
-        client.addChannel("ok_sub_spotcny_eth_kline_15min");
-
-        reactor.join();
     }
 }
