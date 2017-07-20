@@ -39,7 +39,7 @@ public class App {
 
             marketClient.connect();
             marketClient.subTickerEth();
-            marketClient.subTradesEth();
+            //marketClient.subTradesEth();
 
 
             Reactor reactor = new Reactor();
