@@ -15,20 +15,20 @@ public class App {
 
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("usage: " + args[0] + " <config file>");
+        if (args.length != 1) {
+            System.out.println("need argument <config file>");
             System.exit(-1);
         }
 
 
         try {
             Properties prop = new Properties();
-            InputStream configfile = new FileInputStream(args[1]);
+            InputStream configfile = new FileInputStream(args[0]);
 
             prop.load(configfile);
 
             //okcoin client config
-            String apiKey = prop.getProperty("okcoin.apikey");
+            String apiKey = prop.getProperty("okcoin.apiKey");
             String secretKey = prop.getProperty("okcoin.secretKey");
             String okcoin_url = prop.getProperty("okcoin.websocket.url", null);
 
