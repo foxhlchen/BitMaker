@@ -1,5 +1,7 @@
 
 
+import com.okcoin.websocket.WebSocketService;
+import com.okcoin.websocket.test.WebSoketClient;
 import com.qidianai.bitmaker.event.EvQuote;
 import com.qidianai.bitmaker.event.EvTest;
 import com.qidianai.bitmaker.eventsys.Event;
@@ -38,16 +40,23 @@ public class App {
         reactor.register(EvTest.class, handler);
 
 
-        reactor.publish(q);
-        reactor.publish(t);
+        //reactor.publish(q);
+        //reactor.publish(t);
 
-        WebSocketService service = new WebSocketServiceImpl();
+        String url = "wss://real.okcoin.cn:10440/websocket/okcoinapi";
+
+        WebSocketService service = new WebSocketService() {
+            @Override
+            public void onReceive(String msg) {
+                System.out.println(msg);
+            }
+        };
 
         //WebSocket客户端
-        WebSoketClient client = new WebSoketClient(url,service);
+        WebSoketClient client = new WebSoketClient(url, service);
         client.start();
 
-
+        client.addChannel("ok_sub_spotcny_eth_kline_15min");
 
         reactor.join();
     }
