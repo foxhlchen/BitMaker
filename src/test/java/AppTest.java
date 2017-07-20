@@ -64,6 +64,6 @@ public class AppTest {
         reactor.publish(t);
 
         Thread.sleep(1000);
-        reactor.join();
+        reactor.stop();
     }
 }

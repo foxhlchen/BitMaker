@@ -28,6 +28,7 @@ dependencies {
 	
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
+	compile group: 'io.netty', name: 'netty-all', version: '4.0.23.Final'
 	
 	compile ('io.socket:socket.io-client:0.8.3') {
 		exclude group: 'org.json', module: 'json'
