@@ -9,9 +9,6 @@ package com.qidianai.bitmaker.marketclient.okcoin;
  *
  **********************************************************/
 public class JsonTicker {
-
-    public String channel;
-    public static class Data {
         public float high;
         public float vol;
         public float last;
@@ -24,6 +21,4 @@ public class JsonTicker {
         public float dayHigh;
         public float open;
         public long timestamp;
-    }
-    Data data;
 }
