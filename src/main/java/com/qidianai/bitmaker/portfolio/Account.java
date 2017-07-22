@@ -9,5 +9,5 @@ package com.qidianai.bitmaker.portfolio;
  *
  **********************************************************/
 public abstract class Account {
-    abstract void connectMarket();
+    public abstract void connectMarket();
 }

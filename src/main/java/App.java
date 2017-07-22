@@ -16,10 +16,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static sun.misc.PostVMInitHook.run;
+
 
 public class App {
     private Logger log = LogManager.getLogger(getClass().getName());
+    private static boolean running = false;
 
+    public static void run() {
+        running = true;
+        while (running) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -43,6 +56,8 @@ public class App {
 
             StrategyRunner strategyRunner = new StrategyRunner();
             strategyRunner.start();
+
+            run();
 
             strategyRunner.join();
             reactor.join();
