@@ -9,9 +9,6 @@ package com.qidianai.bitmaker.eventsys;
  *
  **********************************************************/
 
-/**
- * Event Handler Interface
- */
 public interface Handler {
     void handle(Event ev);
     long getUid();
