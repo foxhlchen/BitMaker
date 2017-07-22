@@ -37,6 +37,7 @@ public class OKCoinClient {
 
     public void connect() {
         client = new WebSocketClient(url, new WebSocketHandler());
+        client.setKey(apiKey, secretKey);
         client.start();
         log.info("OKCoinClient Connected");
     }
@@ -96,6 +97,18 @@ public class OKCoinClient {
         log.info("subscribe kline eth " + freq);
         client.addChannel("ok_sub_spotcny_eth_kline_" + freq);
 
+        return true;
+    }
+
+    // ------------ trade --------------
+    public boolean login() {
+        if (client == null) {
+            log.warn("login failed client is disconnected");
+            return false;
+        }
+
+        log.info("login to okcoin");
+        client.login();
         return true;
     }
 

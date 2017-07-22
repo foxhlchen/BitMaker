@@ -28,7 +28,7 @@ public class BollingerBand extends Quotation {
     }
 
     @Override
-    public void registerEvent() {
+    public void prepare() {
         Reactor.getInstance().register(EvTicker.class, this);
     }
 

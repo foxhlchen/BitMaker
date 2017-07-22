@@ -1,5 +1,6 @@
 package com.okcoin.websocket;
 
+import com.qidianai.bitmaker.strategy.Strategy;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -43,6 +44,8 @@ public abstract class WebSocketBase {
 	private String url = null;
 	private ChannelFuture future = null;
 	private boolean isAlive = false;
+	private String apiKey;
+	private String secretKey;
 	/** 国内站siteFlag=0,国际站siteFlag=1 */
 	private int siteFlag = 0;
 	private Set<String> subscribChannel = new HashSet<String>();
@@ -80,6 +83,29 @@ public abstract class WebSocketBase {
 		this.sendMessage(dataMsg);
 		subscribChannel.add(channel);
 	}
+
+	public void setKey(String apiKey, String secretKey) {
+        this.apiKey = apiKey;
+        this.secretKey = secretKey;
+    }
+
+    public void login() {
+        Map<String, String> preMap = new HashMap<String, String>();
+        preMap.put("api_key", apiKey);
+        String preStr = MD5Util.createLinkString(preMap);
+        preStr = preStr + "&secret_key=" + secretKey;
+        String signStr = MD5Util.getMD5String(preStr);
+        preMap.put("sign", signStr);
+        String params = MD5Util.getParams(preMap);
+        StringBuilder loginStr = new StringBuilder(
+                "{'event': 'login', 'parameters': ")
+                .append(params).append("}");
+
+
+        this.sendMessage(loginStr.toString());
+        subscribChannel.add("login");
+    }
+
 
 	public void removeChannel(String channel) {
 		if (channel == null) {
@@ -373,6 +399,11 @@ public abstract class WebSocketBase {
 				Iterator<String> it = subscribChannel.iterator();
 				while (it.hasNext()) {
 					String channel = it.next();
+					if (channel.equals("login")) {
+					    this.login();
+					    continue;
+                    }
+
 					this.addChannel(channel);
 				}
 

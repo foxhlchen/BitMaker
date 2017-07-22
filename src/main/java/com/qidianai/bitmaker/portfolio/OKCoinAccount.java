@@ -45,6 +45,7 @@ public class OKCoinAccount extends Account {
         okCoinClient = new OKCoinClient(apiKey, secretKey, url);
         okCoinClient.connect();
 
+        okCoinClient.login();
         okCoinClient.subTickerEth();
     }
 }

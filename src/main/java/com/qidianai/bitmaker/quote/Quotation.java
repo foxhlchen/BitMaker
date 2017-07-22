@@ -9,7 +9,7 @@ public abstract class Quotation extends HandlerBase {
     /**
      * register quotation event
      */
-    public abstract void registerEvent();
+    public abstract void prepare();
 
     /**
      * update quotation indicators

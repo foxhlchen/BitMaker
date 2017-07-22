@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import com.okcoin.websocket.WebSocketService;
 import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.eventsys.Reactor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Type;
 
@@ -18,33 +20,74 @@ import java.lang.reflect.Type;
  **********************************************************/
 public class WebSocketHandler implements WebSocketService {
 
+    private Logger log = LogManager.getLogger(getClass().getName());
+
     @Override
     public void onReceive(String msg) {
         if (msg.charAt(0) == '{')
             return;
 
-
         Type headerType = new TypeToken<JsonMsg[]>() {}.getType();
         Gson gson = new Gson();
-        JsonMsg[] header = gson.fromJson(msg, headerType);
+        JsonMsg[] headerPack = gson.fromJson(msg, headerType);
+        JsonMsg header = headerPack[0];
 
-        if (header[0].channel.equals("ok_sub_spotcny_eth_ticker")) {
-            Type tickerType = new TypeToken<JsonMsg<JsonTicker>[]>() {}.getType();
-            gson = new Gson();
-            JsonMsg<JsonTicker>[] ticker = gson.fromJson(msg, tickerType);
-            JsonTicker tickerData = ticker[0].data;
+        switch (header.channel) {
+            case "ok_sub_spotcny_eth_ticker": {
+                Type tickerType = new TypeToken<JsonMsg<JsonTicker>[]>() {
+                }.getType();
+                gson = new Gson();
+                JsonMsg<JsonTicker>[] ticker = gson.fromJson(msg, tickerType);
+                JsonTicker tickerData = ticker[0].data;
 
-            EvTicker evTicker = new EvTicker();
-            //evTicker.setName("ok_sub_spotcny_eth_ticker");
-            evTicker.setData(tickerData);
-            Reactor.getSingleton().publish(evTicker);
+                EvTicker evTicker = new EvTicker();
+                evTicker.setData(tickerData);
+                Reactor.getSingleton().publish(evTicker);
 
-        } else if (header[0].channel.equals("ok_sub_spotcny_eth_trades")) {
-            Type tradesType = new TypeToken<JsonMsg<String[][]>[]>() {}.getType();
-            gson = new Gson();
-            JsonMsg<String[][]>[] trades = gson.fromJson(msg, tradesType);
-            String[][] data = trades[0].data;
-            System.out.println(data[0][0] + " " + data[0][1]);
+                break;
+            }
+
+            case "ok_sub_spotcny_eth_trades": {
+                Type tradesType = new TypeToken<JsonMsg<String[][]>[]>() {
+                }.getType();
+                gson = new Gson();
+                JsonMsg<String[][]>[] trades = gson.fromJson(msg, tradesType);
+                String[][] data = trades[0].data;
+                System.out.println(data[0][0] + " " + data[0][1]);
+
+                break;
+            }
+
+            case "addChannel": {
+                Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
+                }.getType();
+                gson = new Gson();
+                JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
+                JsonResult result = pack[0].data;
+                if (result.result) {
+                    log.info(result.channel + " is successfully subscribed.");
+                } else {
+                    log.error(result.channel + " fail to subscribe. error_code:" + result.error_code);
+                }
+
+                break;
+            }
+
+            case "login": {
+                Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
+                }.getType();
+                gson = new Gson();
+                JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
+                JsonResult result = pack[0].data;
+                if (result.result) {
+                    log.info("Successfully login in okcoin.");
+                } else {
+                    log.error("Fail to login okcoin. error_code: " + result.error_code);
+                }
+
+                break;
+            }
+
         }
     }
 }

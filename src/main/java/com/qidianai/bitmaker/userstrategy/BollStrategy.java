@@ -21,7 +21,7 @@ public class BollStrategy extends Strategy {
     @Override
     public void prepare() {
         account.connectMarket();
-        boll.registerEvent();
+        boll.prepare();
     }
 
     @Override
