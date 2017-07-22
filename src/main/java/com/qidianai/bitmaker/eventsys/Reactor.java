@@ -168,7 +168,7 @@ public final class Reactor implements Runnable {
 
     @Override
     public void run() {
-        log.info("Run Reactor");
+        log.info("Reactor is running");
 
         while (running) {
             try {

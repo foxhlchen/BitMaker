@@ -42,6 +42,7 @@ public class StrategyRunner implements Runnable{
                 Object obj = ctor.newInstance(new Object[]{});
 
                 Strategy strategy = (Strategy) obj;
+                log.info("Prepare strategy " + k);
                 strategy.prepare();
                 StrategyThread strategyThread = new StrategyThread(k, strategy);
                 strategyBook.add(strategyThread);
@@ -85,7 +86,7 @@ public class StrategyRunner implements Runnable{
 
     @Override
     public void run() {
-        log.info("StrategyRunner Running");
+        log.info("StrategyRunner is running");
         strategyBook.forEach(StrategyThread::start);
 
         while (running) {

@@ -51,6 +51,8 @@ public class StrategyThread extends HandlerBase implements Runnable {
 
     @Override
     public void run() {
+        log.info("Strategy " + this.strategyName + " is running");
+
         while (running) {
             try {
                 strategy.run();
