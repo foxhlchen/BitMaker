@@ -1,5 +1,7 @@
 package com.qidianai.bitmaker.marketclient.okcoin;
 
+import com.okcoin.rest.stock.IStockRestApi;
+import com.okcoin.rest.stock.impl.StockRestApi;
 import com.okcoin.websocket.WebSocketService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +21,7 @@ public class OKCoinClient {
     private String secretKey;
     private String url = "wss://real.okcoin.cn:10440/websocket/okcoinapi";
 
+    private IStockRestApi restApi;
     private WebSocketClient client;
     private Logger log = LogManager.getLogger(getClass().getName());
 
@@ -38,6 +41,8 @@ public class OKCoinClient {
     public void connect() {
         client = new WebSocketClient(url, new WebSocketHandler());
         client.setKey(apiKey, secretKey);
+        restApi =  new StockRestApi("https://www.okcoin.cn", apiKey, secretKey);
+
         client.start();
         log.info("OKCoinClient Connected");
     }

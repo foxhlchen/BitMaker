@@ -19,13 +19,19 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  **********************************************************/
 
-public class StrategyRunner implements Runnable{
+public final class StrategyRunner implements Runnable{
     static StrategyRunner instance_;
 
     private boolean running = false;
     private Logger log = LogManager.getLogger(getClass().getName());
     private Thread t;
     private LinkedList<StrategyThread> strategyBook = new LinkedList<StrategyThread>();
+
+
+    /**
+     * singleton. set private prevent instance by new
+     */
+    private StrategyRunner() { }
 
 
     /**

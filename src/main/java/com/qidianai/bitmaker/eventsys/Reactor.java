@@ -28,6 +28,10 @@ public final class Reactor implements Runnable {
     private ConcurrentHashMap<Class, ConcurrentHashMap<Long, HandlerBase>> regbook = new ConcurrentHashMap<>();
     private ConcurrentLinkedQueue<Event<?>> evQ = new ConcurrentLinkedQueue<>();
 
+    /***
+     * singleton. set private prevent instance by new
+     */
+    private Reactor() { }
 
     /**
      * set reactor event handler

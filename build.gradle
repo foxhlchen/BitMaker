@@ -17,6 +17,7 @@ repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+
 }
 
 dependencies {
@@ -40,6 +41,12 @@ dependencies {
 	}
 
 	compileOnly 'org.projectlombok:lombok:1.16.18'
+
+    compile 'org.apache.httpcomponents:httpcore:4.4.1'
+    compile 'org.apache.httpcomponents:httpclient:4.5'
+
+    compile 'com.alibaba:fastjson:1.2.35'
+    compile 'commons-io:commons-io:2.6-SNAPSHOT'
 }
 
 // Define the main class for the application

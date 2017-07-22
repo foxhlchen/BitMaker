@@ -23,7 +23,7 @@ public class BollingerBand extends Quotation {
         if (ev.getType() == EvTicker.class) {
             EvTicker evTicker = (EvTicker) ev;
             JsonTicker ticker = evTicker.getData();
-            log.info("lastPrice: " + ticker.last);
+            //log.info("lastPrice: " + ticker.last);
         }
     }
 

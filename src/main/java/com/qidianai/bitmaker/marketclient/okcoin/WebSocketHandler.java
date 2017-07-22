@@ -88,6 +88,11 @@ public class WebSocketHandler implements WebSocketService {
                 break;
             }
 
+            case "ok_sub_spotcny_btc_kline_15min":
+            case "ok_sub_spotcny_btc_kline_30min": {
+                System.out.println(msg);
+            }
+
         }
     }
 }

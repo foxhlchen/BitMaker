@@ -47,5 +47,8 @@ public class OKCoinAccount extends Account {
 
         okCoinClient.login();
         okCoinClient.subTickerEth();
+        okCoinClient.subKlineEth("1min");
+        okCoinClient.subKlineEth("15min");
+        okCoinClient.subKlineEth("30min");
     }
 }
