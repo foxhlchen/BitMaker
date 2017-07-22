@@ -1,5 +1,10 @@
+import com.qidianai.bitmaker.config.IgniteCfg;
+import com.qidianai.bitmaker.config.OKCoinCfg;
+import com.qidianai.bitmaker.config.StrategyCfg;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
+import com.qidianai.bitmaker.storage.IgniteManager;
+import com.qidianai.bitmaker.strategy.StrategyRunner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,27 +28,21 @@ public class App {
 
         try {
             Properties prop = new Properties();
-            InputStream configfile = new FileInputStream(args[0]);
+            InputStream configFile = new FileInputStream(args[0]);
+            prop.load(configFile);
 
-            prop.load(configfile);
+            OKCoinCfg.load(prop);
+            IgniteCfg.load(prop);
+            StrategyCfg.load(prop);
 
-            //okcoin client config
-            String apiKey = prop.getProperty("okcoin.apiKey");
-            String secretKey = prop.getProperty("okcoin.secretKey");
-            String okcoin_url = prop.getProperty("okcoin.websocket.url", null);
-
-            OKCoinClient marketClient = new OKCoinClient(apiKey, secretKey);
-            if (okcoin_url != null) {
-                marketClient.setUrl(okcoin_url);
-            }
-
-            marketClient.connect();
-            //marketClient.subTickerEth();
-            marketClient.subTradesEth();
-
-
+            //IgniteManager.startIgnite(IgniteCfg.cfgpath);
             Reactor reactor = new Reactor();
             reactor.start();
+
+            StrategyRunner strategyRunner = new StrategyRunner();
+            strategyRunner.start();
+
+            strategyRunner.join();
             reactor.join();
 
         } catch (IOException e) {

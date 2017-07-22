@@ -7,6 +7,7 @@ public class Event<T> {
     protected T data = null;
     protected Object sender = null;
 
+    protected String name = null;
 
     public Object getSender() {
         return sender;
@@ -39,4 +40,11 @@ public class Event<T> {
         return getClass();
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

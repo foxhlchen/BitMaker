@@ -3,6 +3,8 @@ package com.qidianai.bitmaker.marketclient.okcoin;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.okcoin.websocket.WebSocketService;
+import com.qidianai.bitmaker.event.EvTicker;
+import com.qidianai.bitmaker.eventsys.Reactor;
 
 import java.lang.reflect.Type;
 
@@ -34,6 +36,12 @@ public class WebSocketHandler implements WebSocketService {
             JsonMsg<JsonTicker>[] ticker = gson.fromJson(msg, tickerType);
             JsonTicker tickerData = ticker[0].data;
             System.out.println(tickerData.last);
+
+            EvTicker evTicker = new EvTicker();
+            evTicker.setName("ok_sub_spotcny_eth_ticker");
+            evTicker.setData(tickerData);
+            Reactor.getSingleton().publish(evTicker);
+
         } else if (header[0].channel.equals("ok_sub_spotcny_eth_trades")) {
             Type tradesType = new TypeToken<JsonMsg<String[][]>[]>() {}.getType();
             gson = new Gson();

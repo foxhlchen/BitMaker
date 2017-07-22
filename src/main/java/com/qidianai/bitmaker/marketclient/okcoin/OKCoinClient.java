@@ -29,6 +29,12 @@ public class OKCoinClient {
         this.secretKey = secretKey;
     }
 
+    public OKCoinClient(String apiKey, String secretKey, String url) {
+        this.apiKey = apiKey;
+        this.secretKey = secretKey;
+        this.url = url;
+    }
+
     public void connect() {
         client = new WebSocketClient(url, new WebSocketHandler());
         client.start();
@@ -62,7 +68,8 @@ public class OKCoinClient {
         return true;
     }
 
-    public boolean subTradesEth() {
+
+    public boolean subTradesEth(String freq) {
         if (client == null) {
             log.warn("subTradesEth failed client is disconnected");
             return false;
@@ -74,6 +81,23 @@ public class OKCoinClient {
         return true;
     }
 
+
+    /**
+     * subscribe kline
+     * @param freq 1min, 3min, 5min, 15min, 30min, 1hour, 2hour, 4hour, 6hour, 12hour, day, 3day, week
+     * @return is succeeded
+     */
+    public boolean subKlineEth(String freq) {
+        if (client == null) {
+            log.warn("subTradesEth failed client is disconnected");
+            return false;
+        }
+
+        log.info("subscribe kline eth " + freq);
+        client.addChannel("ok_sub_spotcny_eth_kline_" + freq);
+
+        return true;
+    }
 
     // ------------ getter setter -----------
 

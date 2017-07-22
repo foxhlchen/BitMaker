@@ -22,9 +22,10 @@ public final class Reactor implements Runnable {
     private boolean running = false;
     private Logger log = LogManager.getLogger(getClass().getName());
     private ReactorEvent rev;
+    static private Reactor instance_;
 
 
-    private ConcurrentHashMap<Class, ConcurrentHashMap<Long, Handler>> regbook = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Class, ConcurrentHashMap<Long, HandlerBase>> regbook = new ConcurrentHashMap<>();
     private ConcurrentLinkedQueue<Event<?>> evQ = new ConcurrentLinkedQueue<>();
 
 
@@ -43,14 +44,14 @@ public final class Reactor implements Runnable {
      * @param evtype
      * @param hdr
      */
-    public void register(Class evtype, Handler hdr) {
+    public void register(Class evtype, HandlerBase hdr) {
         log.info(String.format("Subscribe %s by %s uid %d", evtype.getName(), hdr.getClass().getName(), hdr.getUid()));
 
         if (! regbook.containsKey(evtype)) {
             regbook.put(evtype, new ConcurrentHashMap<>());
         }
 
-        ConcurrentHashMap<Long, Handler> handlers = regbook.get(evtype);
+        ConcurrentHashMap<Long, HandlerBase> handlers = regbook.get(evtype);
         handlers.put(hdr.getUid(), hdr);
     }
 
@@ -60,14 +61,14 @@ public final class Reactor implements Runnable {
      * @param evtype
      * @param hdr
      */
-    public void unregister(Class evtype, Handler hdr) {
+    public void unregister(Class evtype, HandlerBase hdr) {
         log.info(String.format("Unsubscribe %s by %s uid %d", evtype.getName(), hdr.getClass().getName(), hdr.getUid()));
 
         if (! regbook.containsKey(evtype)) {
             return;
         }
 
-        ConcurrentHashMap<Long, Handler> handlers = regbook.get(evtype);
+        ConcurrentHashMap<Long, HandlerBase> handlers = regbook.get(evtype);
         handlers.remove(hdr.getUid());
     }
 
@@ -103,7 +104,7 @@ public final class Reactor implements Runnable {
         if (! regbook.containsKey(evtype))
             return;
 
-        ConcurrentHashMap<Long, Handler> handlers = regbook.get(evtype);
+        ConcurrentHashMap<Long, HandlerBase> handlers = regbook.get(evtype);
         handlers.forEach((k, v) -> {
             v.handle(ev);
         });
@@ -185,6 +186,31 @@ public final class Reactor implements Runnable {
                 log.error("Reactor.run encounter problem " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Singleton
+     * @return Reactor instance
+     */
+    public static Reactor getSingleton() {
+        if (instance_ == null) {
+            instance_ = new Reactor();
+        }
+
+        return instance_;
+    }
+
+
+    /**
+     * Singleton
+     * @return Reactor instance
+     */
+    public static Reactor getInstance() {
+        if (instance_ == null) {
+            instance_ = new Reactor();
+        }
+
+        return instance_;
     }
 
 }
