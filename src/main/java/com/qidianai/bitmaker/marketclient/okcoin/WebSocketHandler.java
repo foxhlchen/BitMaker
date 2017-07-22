@@ -23,22 +23,19 @@ public class WebSocketHandler implements WebSocketService {
         if (msg.charAt(0) == '{')
             return;
 
-        System.out.println(msg);
 
         Type headerType = new TypeToken<JsonMsg[]>() {}.getType();
         Gson gson = new Gson();
         JsonMsg[] header = gson.fromJson(msg, headerType);
-        System.out.println(header[0].channel);
 
         if (header[0].channel.equals("ok_sub_spotcny_eth_ticker")) {
             Type tickerType = new TypeToken<JsonMsg<JsonTicker>[]>() {}.getType();
             gson = new Gson();
             JsonMsg<JsonTicker>[] ticker = gson.fromJson(msg, tickerType);
             JsonTicker tickerData = ticker[0].data;
-            System.out.println(tickerData.last);
 
             EvTicker evTicker = new EvTicker();
-            evTicker.setName("ok_sub_spotcny_eth_ticker");
+            //evTicker.setName("ok_sub_spotcny_eth_ticker");
             evTicker.setData(tickerData);
             Reactor.getSingleton().publish(evTicker);
 

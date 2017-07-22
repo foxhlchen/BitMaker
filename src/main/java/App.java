@@ -51,10 +51,10 @@ public class App {
             StrategyCfg.load(prop);
 
             //IgniteManager.startIgnite(IgniteCfg.cfgpath);
-            Reactor reactor = new Reactor();
+            Reactor reactor = Reactor.getInstance();
             reactor.start();
 
-            StrategyRunner strategyRunner = new StrategyRunner();
+            StrategyRunner strategyRunner = StrategyRunner.getInstance();
             strategyRunner.start();
 
             run();

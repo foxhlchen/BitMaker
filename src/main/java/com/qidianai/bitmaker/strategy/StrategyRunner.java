@@ -20,10 +20,13 @@ import java.util.concurrent.ConcurrentHashMap;
  **********************************************************/
 
 public class StrategyRunner implements Runnable{
+    static StrategyRunner instance_;
+
     private boolean running = false;
     private Logger log = LogManager.getLogger(getClass().getName());
     private Thread t;
     private LinkedList<StrategyThread> strategyBook = new LinkedList<StrategyThread>();
+
 
     /**
      * Initial and Run runner.
@@ -96,5 +99,30 @@ public class StrategyRunner implements Runnable{
                 log.error("Runner.run " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Singleton
+     * @return Runner instance
+     */
+    public static StrategyRunner getSingleton() {
+        if (instance_ == null) {
+            instance_ = new StrategyRunner();
+        }
+
+        return instance_;
+    }
+
+
+    /**
+     * Singleton
+     * @return Runner instance
+     */
+    public static StrategyRunner getInstance() {
+        if (instance_ == null) {
+            instance_ = new StrategyRunner();
+        }
+
+        return instance_;
     }
 }
