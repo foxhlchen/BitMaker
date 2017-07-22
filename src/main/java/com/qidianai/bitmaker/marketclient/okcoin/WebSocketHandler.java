@@ -27,6 +27,8 @@ public class WebSocketHandler implements WebSocketService {
         if (msg.charAt(0) == '{')
             return;
 
+        //System.out.println(msg);
+
         Type headerType = new TypeToken<JsonMsg[]>() {}.getType();
         Gson gson = new Gson();
         JsonMsg[] headerPack = gson.fromJson(msg, headerType);
@@ -88,9 +90,19 @@ public class WebSocketHandler implements WebSocketService {
                 break;
             }
 
-            case "ok_sub_spotcny_btc_kline_15min":
-            case "ok_sub_spotcny_btc_kline_30min": {
+            case "ok_sub_spotcny_eth_kline_1min":
+            case "ok_sub_spotcny_eth_kline_15min":
+            case "ok_sub_spotcny_eth_kline_30min": {
                 System.out.println(msg);
+
+                Type type = new TypeToken<JsonMsg<String[][]>[]>() {
+                }.getType();
+                gson = new Gson();
+                JsonMsg<String[][]>[] pack = gson.fromJson(msg, type);
+                String[][] data = pack[0].data;
+
+                System.out.println(data.length);
+
             }
 
         }

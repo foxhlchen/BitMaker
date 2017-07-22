@@ -46,7 +46,7 @@ dependencies {
     compile 'org.apache.httpcomponents:httpclient:4.5'
 
     compile 'com.alibaba:fastjson:1.2.35'
-    compile 'commons-io:commons-io:2.6-SNAPSHOT'
+    compile 'commons-io:commons-io:2.5'
 }
 
 // Define the main class for the application
