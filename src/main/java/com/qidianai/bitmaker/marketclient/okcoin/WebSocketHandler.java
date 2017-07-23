@@ -3,12 +3,16 @@ package com.qidianai.bitmaker.marketclient.okcoin;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.okcoin.websocket.WebSocketService;
+import com.qidianai.bitmaker.event.EvKline;
 import com.qidianai.bitmaker.event.EvTicker;
+import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.util.ArrayList;
 
 /**********************************************************
  * BitMaker
@@ -95,14 +99,45 @@ public class WebSocketHandler implements WebSocketService {
             case "ok_sub_spotcny_eth_kline_30min": {
                 System.out.println(msg);
 
-                Type type = new TypeToken<JsonMsg<String[][]>[]>() {
+                Type type = new TypeToken<JsonMsg<ArrayList<ArrayList<String>>>[]>() {
                 }.getType();
                 gson = new Gson();
-                JsonMsg<String[][]>[] pack = gson.fromJson(msg, type);
-                String[][] data = pack[0].data;
+                JsonMsg<ArrayList<ArrayList<String>>>[] pack = gson.fromJson(msg, type);
+                ArrayList<ArrayList<String>> data = pack[0].data;
 
-                System.out.println(data.length);
 
+                JsonKline.KlinePeriod period = JsonKline.KlinePeriod.kLineNone;
+                switch (header.channel) {
+                    case "ok_sub_spotcny_eth_kline_1min":
+                        period = JsonKline.KlinePeriod.kLine1Min;
+
+                        break;
+                    case "ok_sub_spotcny_eth_kline_15min":
+                        period = JsonKline.KlinePeriod.kLine15Min;
+
+                        break;
+                    case "ok_sub_spotcny_eth_kline_30min":
+                        period = JsonKline.KlinePeriod.kLine30Min;
+
+                        break;
+                }
+
+                JsonKlineBatch batch = new JsonKlineBatch();
+                for (ArrayList<String> kline : data) {
+                    JsonKline jsonKline = new JsonKline();
+                    try {
+                        jsonKline.load(period, kline);
+                    } catch (ParseException e) {
+                        log.error("Kline parse timestamp error " + e.getMessage());
+                    }
+                    batch.add(jsonKline);
+                }
+
+                EvKline evKline = new EvKline();
+                evKline.setData(batch);
+                Reactor.getSingleton().publish(evKline);
+
+                break;
             }
 
         }

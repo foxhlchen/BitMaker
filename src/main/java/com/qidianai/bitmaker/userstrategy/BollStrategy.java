@@ -15,13 +15,15 @@ import com.qidianai.bitmaker.strategy.Strategy;
  *
  **********************************************************/
 public class BollStrategy extends Strategy {
-    Account account = new OKCoinAccount();
+    OKCoinAccount account = new OKCoinAccount();
     BollingerBand boll = new BollingerBand();
 
     @Override
     public void prepare() {
-        account.connectMarket();
         boll.prepare();
+        account.connectMarket();
+        account.subscribeMarketQuotation();
+
     }
 
     @Override

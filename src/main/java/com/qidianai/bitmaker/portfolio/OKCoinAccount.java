@@ -34,6 +34,11 @@ public class OKCoinAccount extends Account {
     }
 
     @Override
+    public void prepare() {
+
+    }
+
+    @Override
     public void connectMarket() {
         if (apiKey == null || secretKey == null) {
             log.error("connectMarket Failed. apiKey or secretKey is not set.");
@@ -44,7 +49,9 @@ public class OKCoinAccount extends Account {
         }
         okCoinClient = new OKCoinClient(apiKey, secretKey, url);
         okCoinClient.connect();
+    }
 
+    public void subscribeMarketQuotation() {
         okCoinClient.login();
         okCoinClient.subTickerEth();
         okCoinClient.subKlineEth("1min");

@@ -9,16 +9,16 @@ package com.qidianai.bitmaker.marketclient.okcoin;
  *
  **********************************************************/
 public class JsonTicker {
-        public float high;
-        public float vol;
-        public float last;
-        public float low;
-        public float buy;
-        public float sell;
-        public float change;
-        public float dayLow;
-        public float close;
-        public float dayHigh;
-        public float open;
+        public double high;
+        public double vol;
+        public double last;
+        public double low;
+        public double buy;
+        public double sell;
+        public double change;
+        public double dayLow;
+        public double close;
+        public double dayHigh;
+        public double open;
         public long timestamp;
 }

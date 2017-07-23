@@ -188,6 +188,7 @@ public final class Reactor implements Runnable {
                 _publish(ev);
             } catch (Exception e) {
                 log.error("Reactor.run encounter problem " + e.getMessage());
+
             }
         }
     }
