@@ -27,8 +27,8 @@ public class BollStrategy extends Strategy {
         Reactor.getInstance().register(EvTicker.class, this);
 
         bollband.prepare();
-        account.connectMarket();
-        account.subscribeMarketQuotation();
+        account.prepare();
+        //account.subscribeMarketQuotation();
     }
 
     @Override

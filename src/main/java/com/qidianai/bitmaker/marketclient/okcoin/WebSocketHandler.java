@@ -142,12 +142,17 @@ public class WebSocketHandler implements WebSocketService {
                     break;
                 }
 
+                case "ok_spotcny_userinfo":
                 case "ok_sub_spotcny_userinfo": {
                     Type type = new TypeToken<JsonMsg<JsonUserInfo>[]>() {
                     }.getType();
                     gson = new Gson();
                     JsonMsg<JsonUserInfo>[] pack = gson.fromJson(msg, type);
                     JsonUserInfo data = pack[idx].data;
+
+                    data.rearrange();
+
+
 
                     //System.out.println(data.free.cny);
                     //System.out.println(data.free.eth);

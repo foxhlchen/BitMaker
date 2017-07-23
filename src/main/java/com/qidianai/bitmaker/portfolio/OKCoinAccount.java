@@ -53,7 +53,8 @@ public class OKCoinAccount extends Account {
 
     @Override
     public void prepare() {
-
+        connectMarket();
+        queryUserInfo();
     }
 
     @Override
@@ -67,6 +68,7 @@ public class OKCoinAccount extends Account {
         }
         okCoinClient = new OKCoinClient(apiKey, secretKey, url);
         okCoinClient.connect();
+        okCoinClient.login();
     }
 
     @Override
@@ -75,7 +77,6 @@ public class OKCoinAccount extends Account {
     }
 
     public void subscribeMarketQuotation() {
-        okCoinClient.login();
         okCoinClient.subTickerEth();
         okCoinClient.subKlineEth("1min");
         okCoinClient.subKlineEth("15min");

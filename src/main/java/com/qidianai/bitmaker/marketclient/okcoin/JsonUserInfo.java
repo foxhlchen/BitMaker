@@ -19,11 +19,28 @@ public class JsonUserInfo {
         public double ltc;
     }
 
+    public class Asset {
+        public double total;
+        public double net;
+    }
+
+
     public class Info {
+        public Info funds;
+
+        Asset asset;
         public Detail free;
         public Detail freezed;
     }
 
+
     double borrowFreeze;
     public Info info;
+
+
+    public void rearrange() {
+        if (info.funds != null) {
+            info = info.funds;
+        }
+    }
 }
