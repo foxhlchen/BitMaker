@@ -115,6 +115,30 @@ public class OKCoinClient {
         log.info("login to okcoin");
         client.login();
         return true;
+
+    }
+
+    public boolean getUserInfo() {
+        if (client == null) {
+            log.warn("getUserInfo failed client is disconnected");
+            return false;
+        }
+
+        log.info("getUserInfo");
+        client.getUserInfo(apiKey, secretKey);
+        return true;
+    }
+
+    public boolean spotTrade(String symbol, String price, String amt, String type) {
+        if (client == null) {
+            log.warn("SpotTrade failed client is disconnected");
+            return false;
+        }
+
+        log.info(String.format("SpotTrade Symbol:%s Price:%s Amount:%s Type:%s", symbol, price, amt, type));
+        client.spotTrade(apiKey, secretKey, symbol, price, amt, type);
+
+        return true;
     }
 
     // ------------ getter setter -----------

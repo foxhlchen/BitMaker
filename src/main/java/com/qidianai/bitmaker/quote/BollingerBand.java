@@ -32,11 +32,6 @@ class BandQueue extends ArrayDeque<JsonKline> {
      */
     static final int K = 2;
 
-    /**
-     * default round decimal places
-     */
-    static final int RoundPlaces = 3;
-
     public double getUpperBand() {
         return upperBand;
     }
@@ -64,6 +59,7 @@ class BandQueue extends ArrayDeque<JsonKline> {
 
     /**
      * Add kline data to history queue
+     *
      * @param jsonKline
      */
     void pushKline(JsonKline jsonKline) {
@@ -97,31 +93,19 @@ class BandQueue extends ArrayDeque<JsonKline> {
             return; //data incomplete
         }
 
-        double average = calculateAverage();
+        double average = getAverage();
         double std = calculateStd();
 
-        upperBand = round(average + K * std);
-        lowerBand = round(average - K * std);
-    }
-
-    private double round(double num) {
-        return round(num, RoundPlaces);
-    }
-
-    private double round(double num, int places) {
-        double k = Math.pow(10, places);
-        num *= k;
-        num = Math.round(num);
-        num /= k;
-
-        return num;
+        upperBand = BollingerBand.round(average + K * std);
+        lowerBand = BollingerBand.round(average - K * std);
     }
 
     /**
      * get bollinger band average
+     *
      * @return average price
      */
-    private double calculateAverage() {
+    public double getAverage() {
         // simple moving average here
         // use last N period price mean
         return calculateMean();
@@ -129,6 +113,7 @@ class BandQueue extends ArrayDeque<JsonKline> {
 
     /**
      * calculate mean average
+     *
      * @return mean average
      */
     private double calculateMean() {
@@ -145,6 +130,7 @@ class BandQueue extends ArrayDeque<JsonKline> {
 
     /**
      * calculate variance
+     *
      * @return variance
      */
     private double calculateVariance() {
@@ -169,6 +155,7 @@ class BandQueue extends ArrayDeque<JsonKline> {
 
     /**
      * calculate standard deviation
+     *
      * @return standard deviation
      */
     private double calculateStd() {
@@ -183,6 +170,24 @@ public class BollingerBand extends Quotation {
     protected BandQueue histKline30m = new BandQueue();
     protected BandQueue histKline1m = new BandQueue();
 
+    /**
+     * default round decimal places
+     */
+    public static final int RoundPlaces = 3;
+
+
+    public static double round(double num) {
+        return round(num, RoundPlaces);
+    }
+
+    public static double round(double num, int places) {
+        double k = Math.pow(10, places);
+        num *= k;
+        num = Math.round(num);
+        num /= k;
+
+        return num;
+    }
 
     @Override
     public void handle(Event ev) {
@@ -197,19 +202,16 @@ public class BollingerBand extends Quotation {
                 switch (jsonKline.klinePeriod) {
                     case kLine1Min:
                         histKline1m.pushKline(jsonKline);
-                        histKline1m.updateBand();
 
                         break;
 
                     case kLine15Min:
                         histKline15m.pushKline(jsonKline);
-                        histKline15m.updateBand();
 
                         break;
 
                     case kLine30Min:
                         histKline30m.pushKline(jsonKline);
-                        histKline30m.updateBand();
 
                         break;
                 }
@@ -260,14 +262,52 @@ public class BollingerBand extends Quotation {
         return price;
     }
 
+    public double getMiddleBand(String period) {
+        double price = Double.MIN_NORMAL;
+
+        switch (period) {
+            case "1min":
+                price = histKline1m.getAverage();
+
+                break;
+            case "15min":
+                price = histKline15m.getAverage();
+
+                break;
+            case "30min":
+                price = histKline30m.getAverage();
+
+                break;
+        }
+
+        return price;
+    }
+
+    public double getPercentB(double lastPrice, String period) {
+        double upperBand = getUpperBand(period);
+        double lowerBand = getLowerBand(period);
+
+        return round((lastPrice - lowerBand) / (upperBand - lowerBand));
+    }
+
+    public double getBandWidth(String period) {
+        double upperBand = getUpperBand(period);
+        double lowerBand = getLowerBand(period);
+        double middleBand = getMiddleBand(period);
+
+        return round((upperBand - lowerBand) / middleBand);
+    }
+
     @Override
     public void prepare() {
-        Reactor.getInstance().register(EvTicker.class, this);
+        //Reactor.getInstance().register(EvTicker.class, this);
         Reactor.getInstance().register(EvKline.class, this);
     }
 
     @Override
     public void update() {
-
+        histKline1m.updateBand();
+        histKline15m.updateBand();
+        histKline30m.updateBand();
     }
 }

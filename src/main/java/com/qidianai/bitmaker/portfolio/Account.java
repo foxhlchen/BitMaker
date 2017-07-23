@@ -11,4 +11,5 @@ package com.qidianai.bitmaker.portfolio;
 public abstract class Account {
     public abstract void prepare();
     public abstract void connectMarket();
+    public abstract void update();
 }

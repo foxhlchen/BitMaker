@@ -31,115 +31,131 @@ public class WebSocketHandler implements WebSocketService {
         if (msg.charAt(0) == '{')
             return;
 
-        //System.out.println(msg);
+        System.out.println(msg);
 
-        Type headerType = new TypeToken<JsonMsg[]>() {}.getType();
+        Type headerType = new TypeToken<JsonMsg[]>() {
+        }.getType();
         Gson gson = new Gson();
         JsonMsg[] headerPack = gson.fromJson(msg, headerType);
-        JsonMsg header = headerPack[0];
 
-        switch (header.channel) {
-            case "ok_sub_spotcny_eth_ticker": {
-                Type tickerType = new TypeToken<JsonMsg<JsonTicker>[]>() {
-                }.getType();
-                gson = new Gson();
-                JsonMsg<JsonTicker>[] ticker = gson.fromJson(msg, tickerType);
-                JsonTicker tickerData = ticker[0].data;
+        int idx = 0;
+        for (JsonMsg header : headerPack) {
+            switch (header.channel) {
+                case "ok_sub_spotcny_eth_ticker": {
+                    Type tickerType = new TypeToken<JsonMsg<JsonTicker>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonTicker>[] ticker = gson.fromJson(msg, tickerType);
+                    JsonTicker tickerData = ticker[idx].data;
 
-                EvTicker evTicker = new EvTicker();
-                evTicker.setData(tickerData);
-                Reactor.getSingleton().publish(evTicker);
+                    EvTicker evTicker = new EvTicker();
+                    evTicker.setData(tickerData);
+                    Reactor.getSingleton().publish(evTicker);
 
-                break;
-            }
-
-            case "ok_sub_spotcny_eth_trades": {
-                Type tradesType = new TypeToken<JsonMsg<String[][]>[]>() {
-                }.getType();
-                gson = new Gson();
-                JsonMsg<String[][]>[] trades = gson.fromJson(msg, tradesType);
-                String[][] data = trades[0].data;
-                System.out.println(data[0][0] + " " + data[0][1]);
-
-                break;
-            }
-
-            case "addChannel": {
-                Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
-                }.getType();
-                gson = new Gson();
-                JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
-                JsonResult result = pack[0].data;
-                if (result.result) {
-                    log.info(result.channel + " is successfully subscribed.");
-                } else {
-                    log.error(result.channel + " fail to subscribe. error_code:" + result.error_code);
+                    break;
                 }
 
-                break;
-            }
+                case "ok_sub_spotcny_eth_trades": {
+                    Type tradesType = new TypeToken<JsonMsg<String[][]>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<String[][]>[] trades = gson.fromJson(msg, tradesType);
+                    String[][] data = trades[idx].data;
+                    System.out.println(data[0][0] + " " + data[0][1]);
 
-            case "login": {
-                Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
-                }.getType();
-                gson = new Gson();
-                JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
-                JsonResult result = pack[0].data;
-                if (result.result) {
-                    log.info("Successfully login in okcoin.");
-                } else {
-                    log.error("Fail to login okcoin. error_code: " + result.error_code);
+                    break;
                 }
 
-                break;
-            }
-
-            case "ok_sub_spotcny_eth_kline_1min":
-            case "ok_sub_spotcny_eth_kline_15min":
-            case "ok_sub_spotcny_eth_kline_30min": {
-                System.out.println(msg);
-
-                Type type = new TypeToken<JsonMsg<ArrayList<ArrayList<String>>>[]>() {
-                }.getType();
-                gson = new Gson();
-                JsonMsg<ArrayList<ArrayList<String>>>[] pack = gson.fromJson(msg, type);
-                ArrayList<ArrayList<String>> data = pack[0].data;
-
-
-                JsonKline.KlinePeriod period = JsonKline.KlinePeriod.kLineNone;
-                switch (header.channel) {
-                    case "ok_sub_spotcny_eth_kline_1min":
-                        period = JsonKline.KlinePeriod.kLine1Min;
-
-                        break;
-                    case "ok_sub_spotcny_eth_kline_15min":
-                        period = JsonKline.KlinePeriod.kLine15Min;
-
-                        break;
-                    case "ok_sub_spotcny_eth_kline_30min":
-                        period = JsonKline.KlinePeriod.kLine30Min;
-
-                        break;
-                }
-
-                JsonKlineBatch batch = new JsonKlineBatch();
-                for (ArrayList<String> kline : data) {
-                    JsonKline jsonKline = new JsonKline();
-                    try {
-                        jsonKline.load(period, kline);
-                    } catch (ParseException e) {
-                        log.error("Kline parse timestamp error " + e.getMessage());
+                case "addChannel": {
+                    Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
+                    JsonResult result = pack[idx].data;
+                    if (result.result) {
+                        log.info(result.channel + " is successfully subscribed.");
+                    } else {
+                        log.error(result.channel + " fail to subscribe. error_code:" + result.error_code);
                     }
-                    batch.add(jsonKline);
+
+                    break;
                 }
 
-                EvKline evKline = new EvKline();
-                evKline.setData(batch);
-                Reactor.getSingleton().publish(evKline);
+                case "login": {
+                    Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
+                    JsonResult result = pack[idx].data;
+                    if (result.result) {
+                        log.info("Successfully login in okcoin.");
+                    } else {
+                        log.error("Fail to login okcoin. error_code: " + result.error_code);
+                    }
 
-                break;
+                    break;
+                }
+
+                case "ok_sub_spotcny_eth_kline_1min":
+                case "ok_sub_spotcny_eth_kline_15min":
+                case "ok_sub_spotcny_eth_kline_30min": {
+                    //System.out.println(msg);
+
+                    Type type = new TypeToken<JsonMsg<ArrayList<ArrayList<String>>>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<ArrayList<ArrayList<String>>>[] pack = gson.fromJson(msg, type);
+                    ArrayList<ArrayList<String>> data = pack[idx].data;
+
+
+                    JsonKline.KlinePeriod period = JsonKline.KlinePeriod.kLineNone;
+                    switch (header.channel) {
+                        case "ok_sub_spotcny_eth_kline_1min":
+                            period = JsonKline.KlinePeriod.kLine1Min;
+
+                            break;
+                        case "ok_sub_spotcny_eth_kline_15min":
+                            period = JsonKline.KlinePeriod.kLine15Min;
+
+                            break;
+                        case "ok_sub_spotcny_eth_kline_30min":
+                            period = JsonKline.KlinePeriod.kLine30Min;
+
+                            break;
+                    }
+
+                    JsonKlineBatch batch = new JsonKlineBatch();
+                    for (ArrayList<String> kline : data) {
+                        JsonKline jsonKline = new JsonKline();
+                        try {
+                            jsonKline.load(period, kline);
+                        } catch (ParseException e) {
+                            log.error("Kline parse timestamp error " + e.getMessage());
+                        }
+                        batch.add(jsonKline);
+                    }
+
+                    EvKline evKline = new EvKline();
+                    evKline.setData(batch);
+                    Reactor.getSingleton().publish(evKline);
+
+                    break;
+                }
+
+                case "ok_sub_spotcny_userinfo": {
+                    Type type = new TypeToken<JsonMsg<JsonUserInfo>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonUserInfo>[] pack = gson.fromJson(msg, type);
+                    JsonUserInfo data = pack[idx].data;
+
+                    //System.out.println(data.free.cny);
+                    //System.out.println(data.free.eth);
+                }
             }
 
+
+            idx++;
         }
     }
 }

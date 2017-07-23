@@ -33,6 +33,24 @@ public class OKCoinAccount extends Account {
         this.url = url;
     }
 
+    public void buyEth(double price, double amount) {
+        String priceStr = String.format("%.3f", price);
+        String amountStr = String.format("%.3f", amount);
+
+        okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "buy");
+    }
+
+    public void sellEth(double price, double amount) {
+        String priceStr = String.format("%.3f", price);
+        String amountStr = String.format("%.3f", amount);
+
+        okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "sell");
+    }
+
+    public void queryUserInfo() {
+        okCoinClient.getUserInfo();
+    }
+
     @Override
     public void prepare() {
 
@@ -51,11 +69,17 @@ public class OKCoinAccount extends Account {
         okCoinClient.connect();
     }
 
+    @Override
+    public void update() {
+
+    }
+
     public void subscribeMarketQuotation() {
         okCoinClient.login();
-        //okCoinClient.subTickerEth();
-        //okCoinClient.subKlineEth("1min");
+        okCoinClient.subTickerEth();
+        okCoinClient.subKlineEth("1min");
         okCoinClient.subKlineEth("15min");
-        //okCoinClient.subKlineEth("30min");
+        okCoinClient.subKlineEth("30min");
+
     }
 }

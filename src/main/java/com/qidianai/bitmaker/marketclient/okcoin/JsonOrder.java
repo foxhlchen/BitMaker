@@ -9,6 +9,6 @@ package com.qidianai.bitmaker.marketclient.okcoin;
  *
  **********************************************************/
 
-public class JsonTrades {
+public class JsonOrder {
 
 }

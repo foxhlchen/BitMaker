@@ -1,6 +1,9 @@
 package com.qidianai.bitmaker.userstrategy;
 
+import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.eventsys.Event;
+import com.qidianai.bitmaker.eventsys.Reactor;
+import com.qidianai.bitmaker.marketclient.okcoin.JsonTicker;
 import com.qidianai.bitmaker.portfolio.Account;
 import com.qidianai.bitmaker.portfolio.OKCoinAccount;
 import com.qidianai.bitmaker.quote.BollingerBand;
@@ -17,9 +20,12 @@ import com.qidianai.bitmaker.strategy.Strategy;
 public class BollStrategy extends Strategy {
     OKCoinAccount account = new OKCoinAccount();
     BollingerBand bollband = new BollingerBand();
+    JsonTicker lastTick = new JsonTicker();
 
     @Override
     public void prepare() {
+        Reactor.getInstance().register(EvTicker.class, this);
+
         bollband.prepare();
         account.connectMarket();
         account.subscribeMarketQuotation();
@@ -27,8 +33,14 @@ public class BollStrategy extends Strategy {
 
     @Override
     public void run() {
-        System.out.println("upper: " + bollband.getUpperBand("15min"));
-        System.out.println("lower: " + bollband.getLowerBand("15min"));
+        bollband.update();
+        account.update();
+
+        //System.out.println("upper: " + bollband.getUpperBand("30min"));
+        //System.out.println("lower: " + bollband.getLowerBand("30min"));
+        //System.out.println("percentB: " + bollband.getPercentB(lastTick.last, "30min"));
+        //System.out.println("bandwidth: " + bollband.getBandWidth("30min"));
+
 
         try {
             Thread.sleep(3000);
@@ -44,6 +56,10 @@ public class BollStrategy extends Strategy {
 
     @Override
     public void handle(Event ev) {
-
+        if (ev.getType() == EvTicker.class) {
+            EvTicker evTicker = (EvTicker) ev;
+            JsonTicker ticker = evTicker.getData();
+            lastTick = ticker;
+        }
     }
 }
