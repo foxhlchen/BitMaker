@@ -1,7 +1,6 @@
 package com.qidianai.bitmaker.quote;
 
 import com.qidianai.bitmaker.event.EvKline;
-import com.qidianai.bitmaker.event.EvTest;
 import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
@@ -12,8 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayDeque;
-import java.util.Calendar;
-import java.util.Deque;
+import java.util.ArrayList;
 
 /**********************************************************
  * BitMaker
@@ -23,33 +21,168 @@ import java.util.Deque;
  * Date: 2017/7/22
  *
  **********************************************************/
-class KlineQueue extends ArrayDeque<JsonKline> {
-    KlineQueue(int numElements) {
-        super(numElements);
+class BandQueue extends ArrayDeque<JsonKline> {
+    /**
+     * band period
+     */
+    static final int N = 20;
+
+    /**
+     * band magnification, K times std over average
+     */
+    static final int K = 2;
+
+    /**
+     * default round decimal places
+     */
+    static final int RoundPlaces = 3;
+
+    public double getUpperBand() {
+        return upperBand;
     }
 
-    public void pushKline(JsonKline jsonKline) {
-        JsonKline first = super.getFirst();
-        if (jsonKline.getDateInt() < first.getDateInt()) {
-            return;
+    public void setUpperBand(double upperBand) {
+        this.upperBand = upperBand;
+    }
+
+    public double getLowerBand() {
+        return lowerBand;
+    }
+
+    public void setLowerBand(double lowerBand) {
+        this.lowerBand = lowerBand;
+    }
+
+    double upperBand = Double.MAX_VALUE;
+    double lowerBand = Double.MIN_NORMAL;
+
+    ArrayList<Double> diffArray = new ArrayList<Double>(N + 5);
+
+    BandQueue() {
+        super(N + 5);
+    }
+
+    /**
+     * Add kline data to history queue
+     * @param jsonKline
+     */
+    void pushKline(JsonKline jsonKline) {
+        JsonKline first = peekFirst();
+
+        if (first != null) {
+            // abandon old kline
+            if (jsonKline.getDateInt() < first.getDateInt()) {
+                return;
+            }
+
+            // update latest kline
+            if (jsonKline.getDateInt() == first.getDateInt()) {
+                first.update(jsonKline);
+                return;
+            }
         }
 
-        if (jsonKline.getDateInt() == first.getDateInt()) {
-            first.update(jsonKline);
-            return;
+        push(jsonKline);
+
+        while (size() > N) {
+            removeLast();
+        }
+    }
+
+    /**
+     * Update bollinger band
+     */
+    void updateBand() {
+        if (size() != N) {
+            return; //data incomplete
         }
 
+        double average = calculateAverage();
+        double std = calculateStd();
+
+        upperBand = round(average + K * std);
+        lowerBand = round(average - K * std);
+    }
+
+    private double round(double num) {
+        return round(num, RoundPlaces);
+    }
+
+    private double round(double num, int places) {
+        double k = Math.pow(10, places);
+        num *= k;
+        num = Math.round(num);
+        num /= k;
+
+        return num;
+    }
+
+    /**
+     * get bollinger band average
+     * @return average price
+     */
+    private double calculateAverage() {
+        // simple moving average here
+        // use last N period price mean
+        return calculateMean();
+    }
+
+    /**
+     * calculate mean average
+     * @return mean average
+     */
+    private double calculateMean() {
+        double sum = 0;
+        for (JsonKline kline : this) {
+            double val = kline.closePrice; //(kline.highPrice - kline.lowPrice) / 2 + kline.lowPrice;
+
+            sum += val;
+        }
+
+        return sum / size();
+    }
 
 
-        super.push(jsonKline);
+    /**
+     * calculate variance
+     * @return variance
+     */
+    private double calculateVariance() {
+        diffArray.clear();
+
+        double mean = calculateMean();
+        for (JsonKline kline : this) {
+            double val = kline.closePrice; //(kline.highPrice - kline.lowPrice) / 2 + kline.lowPrice;
+
+            diffArray.add(Math.pow(val - mean, 2));
+        }
+
+        double variance = 0;
+        for (double v : diffArray) {
+            variance += v;
+        }
+
+        variance /= size();
+
+        return variance;
+    }
+
+    /**
+     * calculate standard deviation
+     * @return standard deviation
+     */
+    private double calculateStd() {
+        double variance = calculateVariance();
+        return Math.sqrt(variance);
     }
 }
 
 public class BollingerBand extends Quotation {
     protected Logger log = LogManager.getLogger(getClass().getName());
-    protected KlineQueue histKline15m = new KlineQueue(25);
-    protected KlineQueue histKline30m = new KlineQueue(25);
-    protected KlineQueue histKline1m = new KlineQueue(25);
+    protected BandQueue histKline15m = new BandQueue();
+    protected BandQueue histKline30m = new BandQueue();
+    protected BandQueue histKline1m = new BandQueue();
+
 
     @Override
     public void handle(Event ev) {
@@ -63,20 +196,68 @@ public class BollingerBand extends Quotation {
             batch.getKlinelist().forEach(jsonKline -> {
                 switch (jsonKline.klinePeriod) {
                     case kLine1Min:
-                        log.info(jsonKline.klinePeriod);
-                        log.info(jsonKline.timeStamp_ms);
-                        log.info(jsonKline.easyDate);
+                        histKline1m.pushKline(jsonKline);
+                        histKline1m.updateBand();
+
                         break;
 
                     case kLine15Min:
+                        histKline15m.pushKline(jsonKline);
+                        histKline15m.updateBand();
+
                         break;
 
                     case kLine30Min:
+                        histKline30m.pushKline(jsonKline);
+                        histKline30m.updateBand();
+
                         break;
                 }
 
             });
         }
+    }
+
+    public double getUpperBand(String period) {
+        double price = Double.MAX_VALUE;
+
+        switch (period) {
+            case "1min":
+                price = histKline1m.getUpperBand();
+
+                break;
+            case "15min":
+                price = histKline15m.getUpperBand();
+
+                break;
+            case "30min":
+                price = histKline30m.getUpperBand();
+
+                break;
+        }
+
+        return price;
+    }
+
+    public double getLowerBand(String period) {
+        double price = Double.MIN_NORMAL;
+
+        switch (period) {
+            case "1min":
+                price = histKline1m.getLowerBand();
+
+                break;
+            case "15min":
+                price = histKline15m.getLowerBand();
+
+                break;
+            case "30min":
+                price = histKline30m.getLowerBand();
+
+                break;
+        }
+
+        return price;
     }
 
     @Override

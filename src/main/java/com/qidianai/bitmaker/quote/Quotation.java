@@ -15,4 +15,5 @@ public abstract class Quotation extends HandlerBase {
      * update quotation indicators
      */
     public abstract void update();
+
 }

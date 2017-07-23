@@ -34,8 +34,8 @@ public class JsonKline {
             return String.format("%d%02d%02d%02d%02d%02d", year, month, day, hour, min, sec);
         }
 
-        public int toInteger() {
-            return Integer.parseInt(toString());
+        public long toInteger() {
+            return Long.parseLong(toString());
         }
     }
 
@@ -71,7 +71,7 @@ public class JsonKline {
         easyDate.sec = klineDate.get(Calendar.SECOND);
     }
 
-    public int getDateInt() {
+    public long getDateInt() {
         return easyDate.toInteger();
     }
 

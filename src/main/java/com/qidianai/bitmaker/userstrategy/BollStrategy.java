@@ -16,19 +16,25 @@ import com.qidianai.bitmaker.strategy.Strategy;
  **********************************************************/
 public class BollStrategy extends Strategy {
     OKCoinAccount account = new OKCoinAccount();
-    BollingerBand boll = new BollingerBand();
+    BollingerBand bollband = new BollingerBand();
 
     @Override
     public void prepare() {
-        boll.prepare();
+        bollband.prepare();
         account.connectMarket();
         account.subscribeMarketQuotation();
-
     }
 
     @Override
     public void run() {
+        System.out.println("upper: " + bollband.getUpperBand("15min"));
+        System.out.println("lower: " + bollband.getLowerBand("15min"));
 
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
