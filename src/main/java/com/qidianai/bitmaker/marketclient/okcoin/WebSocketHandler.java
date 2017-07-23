@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.okcoin.websocket.WebSocketService;
 import com.qidianai.bitmaker.event.EvKline;
 import com.qidianai.bitmaker.event.EvTicker;
+import com.qidianai.bitmaker.event.EvUserInfo;
 import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import org.apache.logging.log4j.LogManager;
@@ -153,9 +154,14 @@ public class WebSocketHandler implements WebSocketService {
                     data.rearrange();
 
 
+                    EvUserInfo evt = new EvUserInfo();
+                    evt.setData(data);
+                    Reactor.getSingleton().publish(evt);
 
-                    //System.out.println(data.free.cny);
-                    //System.out.println(data.free.eth);
+                    System.out.println(data.info.free.cny);
+                    System.out.println(data.info.free.eth);
+
+                    break;
                 }
             }
 
