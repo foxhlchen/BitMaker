@@ -36,11 +36,13 @@ public class BollStrategy extends Strategy {
         bollband.update();
         account.update();
 
-        //System.out.println("upper: " + bollband.getUpperBand("30min"));
-        //System.out.println("lower: " + bollband.getLowerBand("30min"));
-        //System.out.println("percentB: " + bollband.getPercentB(lastTick.last, "30min"));
-        //System.out.println("bandwidth: " + bollband.getBandWidth("30min"));
+        System.out.println("upper: " + bollband.getUpperBand("30min"));
+        System.out.println("lower: " + bollband.getLowerBand("30min"));
+        System.out.println("percentB: " + bollband.getPercentB(lastTick.last, "30min"));
+        System.out.println("bandwidth: " + bollband.getBandWidth("30min"));
 
+        System.out.println(account.getAvailableCny() + " - " + account.getAvailableEth());
+        System.out.println(account.getTotalAssetValueCny(lastTick.last));
 
         try {
             Thread.sleep(3000);
@@ -51,7 +53,9 @@ public class BollStrategy extends Strategy {
 
     @Override
     public void stop() {
-
+        account.exit();
+        bollband.stop();
+        Reactor.getInstance().unregister(EvTicker.class, this);
     }
 
     @Override

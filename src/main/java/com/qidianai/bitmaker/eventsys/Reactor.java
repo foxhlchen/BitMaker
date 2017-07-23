@@ -5,9 +5,12 @@ package com.qidianai.bitmaker.eventsys;
  */
 
 
+import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -23,6 +26,8 @@ public final class Reactor implements Runnable {
     private Logger log = LogManager.getLogger(getClass().getName());
     private ReactorEvent rev;
     static private Reactor instance_;
+    static Object instanceLock = new Object();
+    static HashMap<String, Reactor> reactorMap = new HashMap<>();
 
 
     private ConcurrentHashMap<Class, ConcurrentHashMap<Long, HandlerBase>> regbook = new ConcurrentHashMap<>();
@@ -129,7 +134,7 @@ public final class Reactor implements Runnable {
     /**
      * Create Another thread and Run Reactor.
      */
-    public void start() {
+    private void start() {
         log.info("Start Reactor");
 
         running = true;
@@ -140,7 +145,7 @@ public final class Reactor implements Runnable {
     /**
      * Stop running reactor thread
      */
-    public void stop() {
+    private void stop() {
         log.info("Stop Reactor");
 
         running = false;
@@ -157,7 +162,7 @@ public final class Reactor implements Runnable {
     /**
      * Wait for reactor to die.
      */
-    public void join() {
+    private void join() {
         log.info("Join Reactor Thread");
 
         if (t != null)  {
@@ -199,11 +204,14 @@ public final class Reactor implements Runnable {
      * @return Reactor instance
      */
     public static Reactor getSingleton() {
-        if (instance_ == null) {
-            instance_ = new Reactor();
-        }
+        synchronized (instanceLock) {
+            if (instance_ == null) {
+                instance_ = new Reactor();
+                instance_.start();
+            }
 
-        return instance_;
+            return instance_;
+        }
     }
 
 
@@ -212,12 +220,65 @@ public final class Reactor implements Runnable {
      * @return Reactor instance
      */
     public static Reactor getInstance() {
-        if (instance_ == null) {
-            instance_ = new Reactor();
-        }
-
-        return instance_;
+            return getSingleton();
     }
 
+    /**
+     * Singleton
+     * @return Reactor instance
+     */
+    public static Reactor getSingleton(String namespace) {
+        synchronized (instanceLock) {
+            if (! reactorMap.containsKey(namespace)) {
+                Reactor r = new Reactor();
+                r.start();
+                reactorMap.put(namespace, r);
+            }
+
+            return reactorMap.get(namespace);
+        }
+    }
+
+
+    /**
+     * Singleton
+     * @return Reactor instance
+     */
+    public static Reactor getInstance(String namespace) {
+        return getSingleton(namespace);
+    }
+
+
+    public static void stopReactor() {
+        synchronized (instanceLock) {
+            instance_.stop();
+            instance_ = null;
+        }
+    }
+
+    public static void stopReactor(String namespace) {
+        synchronized (instanceLock) {
+            reactorMap.get(namespace).stop();
+            reactorMap.remove(namespace);
+        }
+    }
+
+    public static void stopAllReactor() {
+        stopReactor();
+
+        reactorMap.forEach((k, v) -> {
+            stopReactor(k);
+        });
+
+        reactorMap.clear();
+    }
+
+    public static void startReactor() {
+        getInstance();
+    }
+
+    public static void startReactor(String namespace) {
+        getInstance(namespace);
+    }
 }
 

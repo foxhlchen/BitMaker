@@ -16,4 +16,8 @@ public abstract class Quotation extends HandlerBase {
      */
     public abstract void update();
 
+    /**
+     * stop quotation services
+     */
+    public abstract void stop();
 }

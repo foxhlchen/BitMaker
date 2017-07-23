@@ -235,7 +235,7 @@ public class FutureRestApiV1 implements IFutureRestApi {
 			params.put("price", price);
 		}
 		if (!StringUtil.isEmpty(amount )) {
-			params.put("amount", amount);
+			params.put("quantity", amount);
 		}
 		if (!StringUtil.isEmpty(type )) {
 			params.put("type", type);

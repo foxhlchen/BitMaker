@@ -11,7 +11,18 @@ import com.qidianai.bitmaker.eventsys.HandlerBase;
  *
  **********************************************************/
 public abstract class Account extends HandlerBase{
+    /**
+     * Initialize account
+     */
     public abstract void prepare();
-    public abstract void connectMarket();
+
+    /**
+     * update logic
+     */
     public abstract void update();
+
+    /**
+     * stop logic
+     */
+    public abstract void exit();
 }

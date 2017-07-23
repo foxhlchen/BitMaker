@@ -74,7 +74,6 @@ public class OKCoinClient {
         return true;
     }
 
-
     public boolean subTradesEth(String freq) {
         if (client == null) {
             log.warn("subTradesEth failed client is disconnected");
@@ -86,7 +85,6 @@ public class OKCoinClient {
 
         return true;
     }
-
 
     /**
      * subscribe kline
@@ -137,6 +135,17 @@ public class OKCoinClient {
 
         log.info(String.format("SpotTrade Symbol:%s Price:%s Amount:%s Type:%s", symbol, price, amt, type));
         client.spotTrade(apiKey, secretKey, symbol, price, amt, type);
+
+        return true;
+    }
+
+    public boolean cancelOrder(String symbol, Long orderId) {
+        if (client == null) {
+            log.warn("cancelorder "+ orderId + " failed client is disconnected");
+            return false;
+        }
+
+        client.cancelOrder(apiKey, secretKey, symbol, orderId);
 
         return true;
     }

@@ -161,7 +161,7 @@ public class StockRestApi implements IStockRestApi{
 			params.put("price", price);
 		}
 		if(!StringUtil.isEmpty(amount)){
-			params.put("amount", amount);
+			params.put("quantity", amount);
 		}
 		String sign = MD5Util.buildMysignV1(params, this.secret_key);
 		params.put("sign", sign);

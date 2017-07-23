@@ -61,7 +61,7 @@ public class StockClient {
 	    stockPost.cancel_order("btc_usd", tradeOrderV1);
 		
 	    //现货批量下单
-	    stockPost.batch_trade("btc_usd", "buy", "[{price:50, amount:0.02},{price:50, amount:0.03}]");
+	    stockPost.batch_trade("btc_usd", "buy", "[{price:50, quantity:0.02},{price:50, quantity:0.03}]");
 
 	    //批量获取用户订单
 	    stockPost.orders_info("0", "btc_usd", "125420341, 125420342");

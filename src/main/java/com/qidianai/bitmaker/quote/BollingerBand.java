@@ -310,4 +310,9 @@ public class BollingerBand extends Quotation {
         histKline15m.updateBand();
         histKline30m.updateBand();
     }
+
+    @Override
+    public void stop() {
+        Reactor.getInstance().unregister(EvKline.class, this);
+    }
 }

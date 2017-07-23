@@ -1,14 +1,18 @@
 package com.qidianai.bitmaker.portfolio;
 
 import com.qidianai.bitmaker.config.OKCoinCfg;
+import com.qidianai.bitmaker.event.EvOrder;
 import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.event.EvUserInfo;
 import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
+import com.qidianai.bitmaker.marketclient.okcoin.JsonOrder;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonUserInfo;
 import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.HashMap;
 
 /**********************************************************
  * BitMaker
@@ -28,6 +32,12 @@ public class OKCoinAccount extends Account {
 
     private JsonUserInfo lastUserInfo;
 
+    public HashMap<String, Order> getOrderMap() {
+        return orderMap;
+    }
+
+    private HashMap<String, Order> orderMap = new HashMap<>();
+
     /**
      * Available Chinese Yuan
      */
@@ -37,6 +47,7 @@ public class OKCoinAccount extends Account {
      * Available ether
      */
     private double availableEth;
+
 
     public double getAvailableCny() {
         return availableCny;
@@ -81,15 +92,6 @@ public class OKCoinAccount extends Account {
         return availableCny + lastEthPrice * availableEth;
     }
 
-    @Override
-    public void prepare() {
-        connectMarket();
-        queryUserInfo();
-
-        Reactor.getInstance().register(EvTicker.class, this);
-    }
-
-    @Override
     public void connectMarket() {
         if (apiKey == null || secretKey == null) {
             log.error("connectMarket Failed. apiKey or secretKey is not set.");
@@ -103,14 +105,6 @@ public class OKCoinAccount extends Account {
         okCoinClient.login();
     }
 
-    @Override
-    public void update() {
-        if (lastUserInfo != null) {
-            availableCny = lastUserInfo.info.free.cny;
-            availableEth = lastUserInfo.info.free.eth;
-        }
-    }
-
     public void subscribeMarketQuotation() {
         okCoinClient.subTickerEth();
         okCoinClient.subKlineEth("1min");
@@ -120,12 +114,47 @@ public class OKCoinAccount extends Account {
     }
 
     @Override
+    public void prepare() {
+        connectMarket();
+        queryUserInfo();
+
+        Reactor.getInstance().register(EvUserInfo.class, this);
+        Reactor.getInstance().register(EvOrder.class, this);
+    }
+
+    @Override
+    public void update() {
+        if (lastUserInfo != null) {
+            availableCny = lastUserInfo.info.free.cny;
+            availableEth = lastUserInfo.info.free.eth;
+        }
+    }
+
+    @Override
+    public void exit() {
+        Reactor.getInstance().unregister(EvUserInfo.class, this);
+        Reactor.getInstance().unregister(EvOrder.class, this);
+    }
+
+    @Override
     public void handle(Event ev) {
         if (ev.getType() == EvUserInfo.class) {
             EvUserInfo evt = (EvUserInfo) ev;
             JsonUserInfo data = evt.getData();
 
             lastUserInfo = data;
+
+        } else if (ev.getType() == EvOrder.class) {
+            EvOrder evt = (EvOrder) ev;
+            JsonOrder data = evt.getData();
+
+            OkCoinOrder order = new OkCoinOrder();
+            order.load(data);
+
+            log.info(order);
+
+            // update orderinfo
+            orderMap.put(order.orderId, order);
         }
     }
 }

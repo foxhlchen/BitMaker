@@ -37,6 +37,15 @@ public class JsonKline {
         public long toInteger() {
             return Long.parseLong(toString());
         }
+
+        public void load(Calendar car) {
+            year = car.get(Calendar.YEAR);
+            month = car.get(Calendar.MONTH) + 1;
+            day = car.get(Calendar.DAY_OF_MONTH);
+            hour = car.get(Calendar.HOUR_OF_DAY);
+            min = car.get(Calendar.MINUTE);
+            sec = car.get(Calendar.SECOND);
+        }
     }
 
     public KlinePeriod klinePeriod;
@@ -63,12 +72,13 @@ public class JsonKline {
         klineDate.setTimeInMillis(Long.parseLong(timeStamp_ms));
 
         easyDate = new KlineDateTime();
-        easyDate.year = klineDate.get(Calendar.YEAR);
-        easyDate.month = klineDate.get(Calendar.MONTH) + 1;
-        easyDate.day = klineDate.get(Calendar.DAY_OF_MONTH);
-        easyDate.hour = klineDate.get(Calendar.HOUR_OF_DAY);
-        easyDate.min = klineDate.get(Calendar.MINUTE);
-        easyDate.sec = klineDate.get(Calendar.SECOND);
+        easyDate.load(klineDate);
+//        easyDate.year = klineDate.get(Calendar.YEAR);
+//        easyDate.month = klineDate.get(Calendar.MONTH) + 1;
+//        easyDate.day = klineDate.get(Calendar.DAY_OF_MONTH);
+//        easyDate.hour = klineDate.get(Calendar.HOUR_OF_DAY);
+//        easyDate.min = klineDate.get(Calendar.MINUTE);
+//        easyDate.sec = klineDate.get(Calendar.SECOND);
     }
 
     public long getDateInt() {

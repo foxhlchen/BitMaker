@@ -3,10 +3,7 @@ package com.qidianai.bitmaker.marketclient.okcoin;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.okcoin.websocket.WebSocketService;
-import com.qidianai.bitmaker.event.EvKline;
-import com.qidianai.bitmaker.event.EvTicker;
-import com.qidianai.bitmaker.event.EvUserInfo;
-
+import com.qidianai.bitmaker.event.*;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +29,7 @@ public class WebSocketHandler implements WebSocketService {
         if (msg.charAt(0) == '{')
             return;
 
-        System.out.println(msg);
+        //System.out.println(msg);
 
         Type headerType = new TypeToken<JsonMsg[]>() {
         }.getType();
@@ -77,11 +74,17 @@ public class WebSocketHandler implements WebSocketService {
                     gson = new Gson();
                     JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
                     JsonResult result = pack[idx].data;
+
+                    result.channel = header.channel;
                     if (result.result) {
                         log.info(result.channel + " is successfully subscribed.");
                     } else {
                         log.error(result.channel + " fail to subscribe. error_code:" + result.error_code);
                     }
+
+                    EvResult evt = new EvResult();
+                    evt.setData(result);
+                    Reactor.getSingleton().publish(evt);
 
                     break;
                 }
@@ -93,11 +96,17 @@ public class WebSocketHandler implements WebSocketService {
                     gson = new Gson();
                     JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
                     JsonResult result = pack[idx].data;
+
+                    result.channel = header.channel;
                     if (result.result) {
                         log.info("Successfully login in okcoin.");
                     } else {
                         log.error("Fail to login okcoin. error_code: " + result.error_code);
                     }
+
+                    EvResult evt = new EvResult();
+                    evt.setData(result);
+                    Reactor.getSingleton().publish(evt);
 
                     break;
                 }
@@ -160,17 +169,70 @@ public class WebSocketHandler implements WebSocketService {
 
                     data.rearrange();
 
-
                     EvUserInfo evt = new EvUserInfo();
                     evt.setData(data);
                     Reactor.getSingleton().publish(evt);
 
-                    System.out.println(data.info.free.cny);
-                    System.out.println(data.info.free.eth);
+                    break;
+                }
+
+                // order result
+                case "ok_spotcny_trade": {
+                    Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
+                    JsonResult result = pack[idx].data;
+                    result.channel = header.channel;
+
+                    if (result.result) {
+                        log.info(result.channel + " " + result.order_id + " order succeeded.");
+                    } else {
+                        log.error(result.channel + " " + result.order_id + " order failed. error_code: " + result.error_code);
+                    }
+
+                    EvResult evt = new EvResult();
+                    evt.setData(result);
+                    Reactor.getSingleton().publish(evt);
 
                     break;
                 }
 
+                // cancel order result
+                case "ok_spotcny_cancel_order": {
+                    Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
+                    JsonResult result = pack[idx].data;
+                    result.channel = header.channel;
+
+                    if (result.result) {
+                        log.info(result.channel + " " + result.order_id + " cancel order succeeded.");
+                    } else {
+                        log.error(result.channel + " " + result.order_id + " cancel order failed. error_code: " + result.error_code);
+                    }
+
+                    EvResult evt = new EvResult();
+                    evt.setData(result);
+                    Reactor.getSingleton().publish(evt);
+
+                    break;
+                }
+
+                case "ok_sub_spotcny_trades": {
+                    Type type = new TypeToken<JsonMsg<JsonOrder>[]>() {
+                    }.getType();
+                    gson = new Gson();
+                    JsonMsg<JsonOrder>[] pack = gson.fromJson(msg, type);
+                    JsonOrder data = pack[idx].data;
+
+                    EvOrder evt = new EvOrder();
+                    evt.setData(data);
+                    Reactor.getSingleton().publish(evt);
+
+                    break;
+                }
             }
 
 

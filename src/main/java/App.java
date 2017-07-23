@@ -51,16 +51,15 @@ public class App {
             StrategyCfg.load(prop);
 
             //IgniteManager.startIgnite(IgniteCfg.cfgpath);
-            Reactor reactor = Reactor.getInstance();
-            reactor.start();
+            Reactor.startReactor();
 
             StrategyRunner strategyRunner = StrategyRunner.getInstance();
             strategyRunner.start();
 
             run();
 
+            Reactor.stopAllReactor();
             strategyRunner.join();
-            reactor.join();
 
         } catch (IOException e) {
             System.out.println("Error while loading configuration file: " + e.getMessage());

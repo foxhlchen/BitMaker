@@ -216,7 +216,7 @@ public abstract class WebSocketBase {
 			double matchPrice, int leverRate) {
 		log.debug("apiKey=" + apiKey + ", secretKey=" + secretKey + ", symbol="
 				+ symbol + ", contractType=" + contractType + ", price="
-				+ price + ", amount=" + amount + ", type=" + type
+				+ price + ", quantity=" + amount + ", type=" + type
 				+ ", matchPrice=" + matchPrice + ", leverRate=" + leverRate);
 		Map<String, String> preMap = new HashMap<String, String>();
 		// 待签名字符串
@@ -224,7 +224,7 @@ public abstract class WebSocketBase {
 		preMap.put("symbol", symbol);
 		preMap.put("contract_type", contractType);
 		preMap.put("price", String.valueOf(price));
-		preMap.put("amount", String.valueOf(amount));
+		preMap.put("quantity", String.valueOf(amount));
 		preMap.put("type", String.valueOf(type));
 		preMap.put("match_price", String.valueOf(matchPrice));
 		preMap.put("lever_rate", String.valueOf(leverRate));
@@ -308,7 +308,7 @@ public abstract class WebSocketBase {
 			signPreMap.put("price", price);
 		}
 		if (amount != null) {
-			signPreMap.put("amount", amount);
+			signPreMap.put("quantity", amount);
 		}
 		signPreMap.put("type", type);
 		String preStr = MD5Util.createLinkString(signPreMap);
