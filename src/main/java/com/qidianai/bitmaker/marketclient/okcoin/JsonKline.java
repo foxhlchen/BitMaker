@@ -1,10 +1,8 @@
 package com.qidianai.bitmaker.marketclient.okcoin;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**********************************************************
@@ -35,6 +33,10 @@ public class JsonKline {
         public String toString() {
             return String.format("%d%02d%02d%02d%02d%02d", year, month, day, hour, min, sec);
         }
+
+        public int toInteger() {
+            return Integer.parseInt(toString());
+        }
     }
 
     public KlinePeriod klinePeriod;
@@ -60,11 +62,28 @@ public class JsonKline {
         klineDate = new GregorianCalendar();
         klineDate.setTimeInMillis(Long.parseLong(timeStamp_ms));
 
+        easyDate = new KlineDateTime();
         easyDate.year = klineDate.get(Calendar.YEAR);
-        easyDate.month = klineDate.get(Calendar.MONTH);
+        easyDate.month = klineDate.get(Calendar.MONTH) + 1;
         easyDate.day = klineDate.get(Calendar.DAY_OF_MONTH);
         easyDate.hour = klineDate.get(Calendar.HOUR_OF_DAY);
         easyDate.min = klineDate.get(Calendar.MINUTE);
         easyDate.sec = klineDate.get(Calendar.SECOND);
+    }
+
+    public int getDateInt() {
+        return easyDate.toInteger();
+    }
+
+    public void update(JsonKline kline) {
+        klinePeriod = kline.klinePeriod;
+        klineDate = kline.klineDate;
+        timeStamp_ms = kline.timeStamp_ms;
+        openPrice = kline.openPrice;
+        highPrice = kline.highPrice;
+        lowPrice = kline.lowPrice;
+        closePrice = kline.closePrice;
+        volumn = kline.volumn;
+        easyDate = kline.easyDate;
     }
 }
