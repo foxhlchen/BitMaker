@@ -28,7 +28,7 @@ public class BollStrategy extends Strategy {
 
         bollband.prepare();
         account.prepare();
-        //account.subscribeMarketQuotation();
+        account.subscribeMarketQuotation();
     }
 
     @Override

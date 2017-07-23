@@ -6,7 +6,7 @@ import com.okcoin.websocket.WebSocketService;
 import com.qidianai.bitmaker.event.EvKline;
 import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.event.EvUserInfo;
-import com.qidianai.bitmaker.eventsys.Event;
+
 import com.qidianai.bitmaker.eventsys.Reactor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +42,8 @@ public class WebSocketHandler implements WebSocketService {
         int idx = 0;
         for (JsonMsg header : headerPack) {
             switch (header.channel) {
+
+                // market ticker quote push
                 case "ok_sub_spotcny_eth_ticker": {
                     Type tickerType = new TypeToken<JsonMsg<JsonTicker>[]>() {
                     }.getType();
@@ -56,6 +58,7 @@ public class WebSocketHandler implements WebSocketService {
                     break;
                 }
 
+                // market trades push
                 case "ok_sub_spotcny_eth_trades": {
                     Type tradesType = new TypeToken<JsonMsg<String[][]>[]>() {
                     }.getType();
@@ -67,6 +70,7 @@ public class WebSocketHandler implements WebSocketService {
                     break;
                 }
 
+                // addChannel return
                 case "addChannel": {
                     Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
                     }.getType();
@@ -82,6 +86,7 @@ public class WebSocketHandler implements WebSocketService {
                     break;
                 }
 
+                // login return
                 case "login": {
                     Type type = new TypeToken<JsonMsg<JsonResult>[]>() {
                     }.getType();
@@ -97,6 +102,7 @@ public class WebSocketHandler implements WebSocketService {
                     break;
                 }
 
+                // OHLC/Kline chart information
                 case "ok_sub_spotcny_eth_kline_1min":
                 case "ok_sub_spotcny_eth_kline_15min":
                 case "ok_sub_spotcny_eth_kline_30min": {
@@ -143,6 +149,7 @@ public class WebSocketHandler implements WebSocketService {
                     break;
                 }
 
+                // user account info
                 case "ok_spotcny_userinfo":
                 case "ok_sub_spotcny_userinfo": {
                     Type type = new TypeToken<JsonMsg<JsonUserInfo>[]>() {
@@ -163,6 +170,7 @@ public class WebSocketHandler implements WebSocketService {
 
                     break;
                 }
+
             }
 
 

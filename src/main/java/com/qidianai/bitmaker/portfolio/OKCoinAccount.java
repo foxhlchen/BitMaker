@@ -1,6 +1,11 @@
 package com.qidianai.bitmaker.portfolio;
 
 import com.qidianai.bitmaker.config.OKCoinCfg;
+import com.qidianai.bitmaker.event.EvTicker;
+import com.qidianai.bitmaker.event.EvUserInfo;
+import com.qidianai.bitmaker.eventsys.Event;
+import com.qidianai.bitmaker.eventsys.Reactor;
+import com.qidianai.bitmaker.marketclient.okcoin.JsonUserInfo;
 import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +25,27 @@ public class OKCoinAccount extends Account {
     private String apiKey = OKCoinCfg.apiKey;
     private String secretKey = OKCoinCfg.secretKey;
     private String url = OKCoinCfg.url;
+
+    private JsonUserInfo lastUserInfo;
+
+    /**
+     * Available Chinese Yuan
+     */
+    private double availableCny;
+
+    /**
+     * Available ether
+     */
+    private double availableEth;
+
+    public double getAvailableCny() {
+        return availableCny;
+    }
+
+    public double getAvailableEth() {
+        return availableEth;
+    }
+
 
     public void setMarketAccount(String apiKey, String secretKey) {
         this.apiKey = apiKey;
@@ -51,10 +77,16 @@ public class OKCoinAccount extends Account {
         okCoinClient.getUserInfo();
     }
 
+    public double getTotalAssetValueCny(double lastEthPrice) {
+        return availableCny + lastEthPrice * availableEth;
+    }
+
     @Override
     public void prepare() {
         connectMarket();
         queryUserInfo();
+
+        Reactor.getInstance().register(EvTicker.class, this);
     }
 
     @Override
@@ -73,7 +105,10 @@ public class OKCoinAccount extends Account {
 
     @Override
     public void update() {
-
+        if (lastUserInfo != null) {
+            availableCny = lastUserInfo.info.free.cny;
+            availableEth = lastUserInfo.info.free.eth;
+        }
     }
 
     public void subscribeMarketQuotation() {
@@ -82,5 +117,15 @@ public class OKCoinAccount extends Account {
         okCoinClient.subKlineEth("15min");
         okCoinClient.subKlineEth("30min");
 
+    }
+
+    @Override
+    public void handle(Event ev) {
+        if (ev.getType() == EvUserInfo.class) {
+            EvUserInfo evt = (EvUserInfo) ev;
+            JsonUserInfo data = evt.getData();
+
+            lastUserInfo = data;
+        }
     }
 }

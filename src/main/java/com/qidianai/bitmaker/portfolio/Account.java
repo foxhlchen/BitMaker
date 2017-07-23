@@ -1,5 +1,7 @@
 package com.qidianai.bitmaker.portfolio;
 
+import com.qidianai.bitmaker.eventsys.HandlerBase;
+
 /**********************************************************
  * BitMaker
  *
@@ -8,7 +10,7 @@ package com.qidianai.bitmaker.portfolio;
  * Date: 2017/7/22
  *
  **********************************************************/
-public abstract class Account {
+public abstract class Account extends HandlerBase{
     public abstract void prepare();
     public abstract void connectMarket();
     public abstract void update();
