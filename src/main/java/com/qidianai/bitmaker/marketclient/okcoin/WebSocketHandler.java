@@ -112,6 +112,7 @@ public class WebSocketHandler implements WebSocketService {
 
                 // OHLC/Kline chart information
                 case "ok_sub_spotcny_eth_kline_1min":
+                case "ok_sub_spotcny_eth_kline_5min":
                 case "ok_sub_spotcny_eth_kline_15min":
                 case "ok_sub_spotcny_eth_kline_30min": {
                     //System.out.println(msg);
@@ -127,6 +128,10 @@ public class WebSocketHandler implements WebSocketService {
                     switch (header.channel) {
                         case "ok_sub_spotcny_eth_kline_1min":
                             period = JsonKline.KlinePeriod.kLine1Min;
+
+                            break;
+                        case "ok_sub_spotcny_eth_kline_5min":
+                            period = JsonKline.KlinePeriod.kLine5Min;
 
                             break;
                         case "ok_sub_spotcny_eth_kline_15min":

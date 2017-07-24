@@ -169,6 +169,7 @@ public class BollingerBand extends Quotation {
     protected BandQueue histKline15m = new BandQueue();
     protected BandQueue histKline30m = new BandQueue();
     protected BandQueue histKline1m = new BandQueue();
+    protected BandQueue histKline5m = new BandQueue();
 
     /**
      * default round decimal places
@@ -214,6 +215,10 @@ public class BollingerBand extends Quotation {
                         histKline30m.pushKline(jsonKline);
 
                         break;
+                    case kLine5Min:
+                        histKline5m.pushKline(jsonKline);
+
+                        break;
                 }
 
             });
@@ -234,6 +239,10 @@ public class BollingerBand extends Quotation {
                 break;
             case "30min":
                 price = histKline30m.getUpperBand();
+
+                break;
+            case "5min":
+                price = histKline5m.getUpperBand();
 
                 break;
         }
@@ -257,6 +266,10 @@ public class BollingerBand extends Quotation {
                 price = histKline30m.getLowerBand();
 
                 break;
+            case "5min":
+                price = histKline5m.getLowerBand();
+
+                break;
         }
 
         return price;
@@ -276,6 +289,11 @@ public class BollingerBand extends Quotation {
                 break;
             case "30min":
                 price = histKline30m.getAverage();
+
+                break;
+
+            case "5min":
+                price = histKline5m.getAverage();
 
                 break;
         }
@@ -309,6 +327,7 @@ public class BollingerBand extends Quotation {
         histKline1m.updateBand();
         histKline15m.updateBand();
         histKline30m.updateBand();
+        histKline5m.updateBand();
     }
 
     @Override

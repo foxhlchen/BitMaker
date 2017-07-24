@@ -142,6 +142,7 @@ public class OKCoinAccount extends Account {
     public void subscribeMarketQuotation() {
         okCoinClient.subTickerEth();
         okCoinClient.subKlineEth("1min");
+        okCoinClient.subKlineEth("5min");
         okCoinClient.subKlineEth("15min");
         okCoinClient.subKlineEth("30min");
 

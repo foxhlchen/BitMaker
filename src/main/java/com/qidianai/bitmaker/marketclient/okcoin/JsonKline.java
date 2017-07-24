@@ -17,6 +17,7 @@ public class JsonKline {
     public enum KlinePeriod {
         kLineNone,
         kLine1Min,
+        kLine5Min,
         kLine15Min,
         kLine30Min,
     }
