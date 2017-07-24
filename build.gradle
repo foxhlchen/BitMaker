@@ -35,8 +35,11 @@ dependencies {
     compile group: 'org.apache.ignite', name: 'ignite-spring', version: '2.0.0'
     compile group: 'org.apache.ignite', name: 'ignite-indexing', version: '2.0.0'
 
+    compile 'javax.mail:mail:1.4.1'
+    compile group: 'com.sun.mail', name: 'javax.mail', version: '1.6.0'
 
-	compile ('io.socket:socket.io-client:0.8.3') {
+
+    compile ('io.socket:socket.io-client:0.8.3') {
 		exclude group: 'org.json', module: 'json'
 	}
 
