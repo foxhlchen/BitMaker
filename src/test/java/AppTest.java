@@ -77,17 +77,17 @@ public class AppTest {
     }
 
     @Test public void IgniteTest() {
-        Ignition.setClientMode(true);
-        try (Ignite ignite = Ignition.start()) {
-            IgniteCache<Integer, String> cache = ignite.getOrCreateCache("myCacheName");
-
-            // Store keys in cache (values will end up on different cache nodes).
-            for (int i = 0; i < 10; i++)
-                cache.put(i, Integer.toString(i));
-
-            for (int i = 0; i < 10; i++)
-                System.out.println("Got [key=" + i + ", val=" + cache.get(i) + ']');
-        }
+//        Ignition.setClientMode(true);
+//        try (Ignite ignite = Ignition.start()) {
+//            IgniteCache<Integer, String> cache = ignite.getOrCreateCache("myCacheName");
+//
+//            // Store keys in cache (values will end up on different cache nodes).
+//            for (int i = 0; i < 10; i++)
+//                cache.put(i, Integer.toString(i));
+//
+//            for (int i = 0; i < 10; i++)
+//                System.out.println("Got [key=" + i + ", val=" + cache.get(i) + ']');
+//        }
     }
 
     @Test public void GsonTest() {
@@ -106,5 +106,9 @@ public class AppTest {
 
         System.out.println(data.info.freezed.cny);
         System.out.println(data.info.free.eth);
+    }
+
+    @Test public void SMTPTest() {
+        SMTPNotify.send("BitMaker SMTP Test", "OK");
     }
 }
