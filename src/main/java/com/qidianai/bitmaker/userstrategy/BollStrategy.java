@@ -18,9 +18,46 @@ import com.qidianai.bitmaker.strategy.Strategy;
  *
  **********************************************************/
 public class BollStrategy extends Strategy {
+    final double RISK_FACTOR = 0.9;
+
+    MarketStatus marketStatus = MarketStatus.mkNormal;
     OKCoinAccount account = new OKCoinAccount();
     BollingerBand bollband = new BollingerBand();
     JsonTicker lastTick = new JsonTicker();
+
+
+    public void buySignal() {
+        log.info("Buy signal is triggered.");
+
+        double availableCny = account.getAvailableCny();
+        if (availableCny > 1) {
+            account.buyMarketEth(availableCny);
+        }
+    }
+
+    public void sellSignal() {
+        log.info("Sell signal is triggered.");
+
+        double availableEth = account.getAvailableEth();
+        if (availableEth >= 0.001) {
+            account.sellMarketEth(availableEth);
+        }
+    }
+
+    public void riskSignal() {
+        log.warn("Risk signal is triggered.");
+
+        //cancel all active orders
+        account.getActiveOrderMap().forEach((orderId, order) -> {
+            account.cancelEth(orderId);
+        });
+
+        double avalableEth = account.getAvailableEth();
+        // sell all ether, close all positions
+        if (account.getAvailableEth() >= 0.001) {
+            account.sellMarketEth(avalableEth);
+        }
+    }
 
     @Override
     public void prepare() {
@@ -36,13 +73,43 @@ public class BollStrategy extends Strategy {
         bollband.update();
         account.update();
 
-        System.out.println("upper: " + bollband.getUpperBand("30min"));
-        System.out.println("lower: " + bollband.getLowerBand("30min"));
-        System.out.println("percentB: " + bollband.getPercentB(lastTick.last, "30min"));
-        System.out.println("bandwidth: " + bollband.getBandWidth("30min"));
+        // risk manage
+        if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
+            riskSignal();
+        }
 
-        System.out.println(account.getAvailableCny() + " - " + account.getAvailableEth());
-        System.out.println(account.getTotalAssetValueCny(lastTick.last));
+        double percentB_1min = bollband.getPercentB(lastTick.last, "1min");
+        double percentB_15min = bollband.getPercentB(lastTick.last, "15min");
+        double percentB_30min = bollband.getPercentB(lastTick.last, "30min");
+
+        switch (marketStatus) {
+            case mkNormal: {
+                if (percentB_15min < 0 && percentB_30min < 0) {
+                    marketStatus = MarketStatus.mkLower;
+                }
+
+                if (percentB_15min > 1 && percentB_30min > 1) {
+                    marketStatus = MarketStatus.mkHigher;
+                }
+
+                break;
+            }
+            case mkHigher: {
+                if (percentB_30min < 1) {
+                    sellSignal();
+                    marketStatus = MarketStatus.mkNormal;
+                }
+
+                break;
+            }
+            case mkLower: {
+                if (percentB_30min > 0) {
+                    buySignal();
+                    marketStatus = MarketStatus.mkNormal;
+                }
+            }
+        }
+
 
         try {
             Thread.sleep(3000);
@@ -65,5 +132,11 @@ public class BollStrategy extends Strategy {
             JsonTicker ticker = evTicker.getData();
             lastTick = ticker;
         }
+    }
+
+    enum MarketStatus {
+        mkNormal,
+        mkLower,
+        mkHigher,
     }
 }

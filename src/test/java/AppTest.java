@@ -62,7 +62,7 @@ public class AppTest {
         Reactor reactor = Reactor.getInstance();
 
 
-        reactor.start();
+        //reactor.start();
 
         reactor.register(EvTicker.class, handler);
         reactor.register(EvTest.class, handler);
@@ -72,7 +72,7 @@ public class AppTest {
 //        reactor.publish(t);
 
         //Thread.sleep(1000);
-        reactor.stop();
+        //reactor.stop();
     }
 
     @Test public void IgniteTest() {
@@ -90,6 +90,8 @@ public class AppTest {
     }
 
     @Test public void GsonTest() {
+        System.out.println(String.format("%s", null));
+
         String msg = "[{\"data\":{\"averagePrice\":\"0\",\"completedTradeAmount\":\"0\",\"createdDate\":1500796842450,\"id\":27462555,\"orderId\":27462555,\"status\":0,\"symbol\":\"eth_cny\",\"tradeAmount\":\"0.137\",\"tradePrice\":\"0\",\"tradeType\":\"buy\",\"tradeUnitPrice\":\"1474.9\",\"unTrade\":\"0.137\"},\"channel\":\"ok_sub_spotcny_trades\"},{\"data\":{\"borrowFreeze\":0.0,\"info\":{\"lended\":{\"btc\":0.0,\"ltc\":0.0,\"cny\":0.0},\"lendFreeze\":{\"btc\":0.0,\"ltc\":0.0,\"cny\":0.0},\"fund\":{\"btc\":0.0,\"ltc\":0.0},\"borrow\":{\"btc\":0.0,\"ltc\":0.0,\"cny\":0.0},\"free\":{\"btc\":3.0E-4,\"eth\":9.325E-4,\"ltc\":0.0,\"cny\":0.5592},\"lend\":{\"btc\":0.0,\"ltc\":0.0,\"cny\":0.0},\"freezed\":{\"btc\":0.0,\"eth\":0.0,\"ltc\":0.0,\"cny\":202.0613},\"binterest\":{\"btc\":0.0,\"ltc\":0.0,\"cny\":0.0}}},\"channel\":\"ok_sub_spotcny_userinfo\"}]";
         String msg2 = "[{\"data\":{\"result\":true,\"info\":{\"funds\":{\"asset\":{\"total\":\"211.58\",\"net\":\"211.58\"},\"free\":{\"btc\":\"0.0003\",\"eth\":\"0.137864\",\"ltc\":\"0\",\"cny\":\"0.65748\"},\"freezed\":{\"btc\":\"0\",\"eth\":\"0\",\"ltc\":\"0\",\"cny\":\"0\"}}}},\"channel\":\"ok_spotcny_userinfo\"}]";
         //System.out.println(msg);

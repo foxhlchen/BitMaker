@@ -228,6 +228,9 @@ public final class Reactor implements Runnable {
      * @return Reactor instance
      */
     public static Reactor getSingleton(String namespace) {
+        if (namespace == null)
+           return getSingleton();
+
         synchronized (instanceLock) {
             if (! reactorMap.containsKey(namespace)) {
                 Reactor r = new Reactor();

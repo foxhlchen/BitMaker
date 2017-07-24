@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**********************************************************
  * BitMaker
@@ -31,23 +32,29 @@ public class OKCoinAccount extends Account {
     private String url = OKCoinCfg.url;
 
     private JsonUserInfo lastUserInfo;
-
-    public HashMap<String, Order> getOrderMap() {
-        return orderMap;
-    }
-
-    private HashMap<String, Order> orderMap = new HashMap<>();
-
+    private ConcurrentHashMap<String, Order> orderMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Order> activeOrderMap = new ConcurrentHashMap<>();
+    private double initialCny = -1;
     /**
      * Available Chinese Yuan
      */
     private double availableCny;
-
     /**
      * Available ether
      */
     private double availableEth;
 
+    public double getInitialCny() {
+        return initialCny;
+    }
+
+    public ConcurrentHashMap<String, Order> getOrderMap() {
+        return orderMap;
+    }
+
+    public ConcurrentHashMap<String, Order> getActiveOrderMap() {
+        return activeOrderMap;
+    }
 
     public double getAvailableCny() {
         return availableCny;
@@ -71,6 +78,8 @@ public class OKCoinAccount extends Account {
     }
 
     public void buyEth(double price, double amount) {
+        log.warn("Buy eth " + price + " " + amount);
+
         String priceStr = String.format("%.3f", price);
         String amountStr = String.format("%.3f", amount);
 
@@ -78,10 +87,34 @@ public class OKCoinAccount extends Account {
     }
 
     public void sellEth(double price, double amount) {
+        log.warn("Sell eth " + price + " " + amount);
+
         String priceStr = String.format("%.3f", price);
         String amountStr = String.format("%.3f", amount);
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "sell");
+    }
+
+    public void buyMarketEth(double price) {
+        log.warn("Buy eth (market) " + price);
+
+        String priceStr = String.format("%.3f", price);
+        String amountStr = null;
+
+        okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "buy_market");
+    }
+
+    public void sellMarketEth(double amount) {
+        log.warn("Sell eth (market) "  + amount);
+
+        String priceStr = null;
+        String amountStr = String.format("%.3f", amount);
+
+        okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "sell_market");
+    }
+
+    public void cancelEth(String orderId) {
+        okCoinClient.cancelOrder("eth_cny", Long.parseLong(orderId));
     }
 
     public void queryUserInfo() {
@@ -115,11 +148,11 @@ public class OKCoinAccount extends Account {
 
     @Override
     public void prepare() {
-        connectMarket();
-        queryUserInfo();
-
         Reactor.getInstance().register(EvUserInfo.class, this);
         Reactor.getInstance().register(EvOrder.class, this);
+
+        connectMarket();
+        queryUserInfo();
     }
 
     @Override
@@ -127,6 +160,15 @@ public class OKCoinAccount extends Account {
         if (lastUserInfo != null) {
             availableCny = lastUserInfo.info.free.cny;
             availableEth = lastUserInfo.info.free.eth;
+
+            // update initial money CNY
+            if (initialCny == -1) {
+                initialCny = availableCny;
+            }
+
+            if (availableEth < 0.001) {
+                initialCny = availableCny;
+            }
         }
     }
 
@@ -153,8 +195,16 @@ public class OKCoinAccount extends Account {
 
             log.info(order);
 
+
             // update orderinfo
             orderMap.put(order.orderId, order);
+            activeOrderMap.put(order.orderId, order);
+
+
+            // Order Finished
+            if (order.status == Order.OrderStatus.OrderDone || order.status == Order.OrderStatus.OrderCancelled) {
+                orderMap.remove(order.orderId);
+            }
         }
     }
 }
