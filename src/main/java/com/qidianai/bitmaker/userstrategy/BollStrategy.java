@@ -102,14 +102,17 @@ public class BollStrategy extends Strategy {
         double percentB_15min = bollband.getPercentB(lastTick.last, "15min");
         double percentB_30min = bollband.getPercentB(lastTick.last, "30min");
 
+        double sig_main = percentB_30min;
+        double sig_assist = percentB_15min;
+
         switch (marketStatus) {
             case mkNormal: {
-                if (percentB_1min < 0 && percentB_5min < 0) {
+                if (sig_main < 0 && sig_assist < 0) {
                     log.info("price got into low state.");
                     marketStatus = MarketStatus.mkLower;
                 }
 
-                if (percentB_1min > 1 && percentB_5min > 1) {
+                if (sig_main > 1 && sig_assist > 1) {
                     log.info("price got into high state.");
                     marketStatus = MarketStatus.mkHigher;
                 }
@@ -117,7 +120,7 @@ public class BollStrategy extends Strategy {
                 break;
             }
             case mkHigher: {
-                if (percentB_5min < 1) {
+                if (sig_main < 1) {
                     sellSignal();
 
                     log.info("price got into normal state.");
@@ -127,7 +130,7 @@ public class BollStrategy extends Strategy {
                 break;
             }
             case mkLower: {
-                if (percentB_5min > 0) {
+                if (sig_main > 0) {
                     buySignal();
 
                     log.info("price got into normal state.");
