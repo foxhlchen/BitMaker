@@ -75,7 +75,6 @@ public class WebSocketHandler implements WebSocketService {
                     JsonMsg<JsonResult>[] pack = gson.fromJson(msg, type);
                     JsonResult result = pack[idx].data;
 
-                    result.channel = header.channel;
                     if (result.result) {
                         log.info(result.channel + " is successfully subscribed.");
                     } else {
