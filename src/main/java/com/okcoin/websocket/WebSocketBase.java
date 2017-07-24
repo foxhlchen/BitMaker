@@ -261,7 +261,7 @@ public abstract class WebSocketBase {
 				.append("','parameters':{'api_key':'").append(apiKey)
 				.append("','sign':'").append(signStr)
 				.append("'},'binary':'true'}");
-		log.info(tradeStr.toString());
+//		log.info(tradeStr.toString());
 		this.sendMessage(tradeStr.toString());
 	}
 
