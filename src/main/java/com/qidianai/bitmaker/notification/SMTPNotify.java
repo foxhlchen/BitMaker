@@ -18,7 +18,7 @@ import java.util.Properties;
 public class SMTPNotify implements Notification {
     static final String fromEmail = "tradewarn@54fox.com"; //requires valid gmail id
     static final String password = "BitMaker666"; // correct password for gmail id
-    static final String toEmail = "foxhlchen@qq.vip.com"; // can be any email id
+    static final String toEmail = "foxhlchen@foxmail.com"; // can be any email id
 
 
     public static void send(String subject, String body) {
@@ -39,7 +39,7 @@ public class SMTPNotify implements Notification {
         };
 
         Session session = Session.getDefaultInstance(props, auth);
-        EmailUtil.sendEmail(session, toEmail,subject, body);
+        EmailUtil.sendEmail(session, fromEmail, toEmail,subject, body);
 
         //EmailUtil.sendAttachmentEmail(session, toEmail,"SSLEmail Testing Subject with Attachment", "SSLEmail Testing Body with Attachment");
 

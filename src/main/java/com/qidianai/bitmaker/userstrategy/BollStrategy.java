@@ -4,6 +4,7 @@ import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonTicker;
+import com.qidianai.bitmaker.notification.SMTPNotify;
 import com.qidianai.bitmaker.portfolio.Account;
 import com.qidianai.bitmaker.portfolio.OKCoinAccount;
 import com.qidianai.bitmaker.quote.BollingerBand;
@@ -46,6 +47,8 @@ public class BollStrategy extends Strategy {
 
     public void riskSignal() {
         log.warn("Risk signal is triggered.");
+
+        SMTPNotify.send("Risk signal", "Risk signal has been triggered at price " + lastTick.last);
 
         //cancel all active orders
         account.getActiveOrderMap().forEach((orderId, order) -> {

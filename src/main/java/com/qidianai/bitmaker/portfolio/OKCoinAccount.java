@@ -9,6 +9,7 @@ import com.qidianai.bitmaker.eventsys.Reactor;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonOrder;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonUserInfo;
 import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
+import com.qidianai.bitmaker.notification.SMTPNotify;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -203,6 +204,7 @@ public class OKCoinAccount extends Account {
 
             // Order Finished
             if (order.status == Order.OrderStatus.OrderDone || order.status == Order.OrderStatus.OrderCancelled) {
+                SMTPNotify.send("Order Information " + order.orderId, order.toString());
                 orderMap.remove(order.orderId);
             }
         }
