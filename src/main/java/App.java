@@ -2,21 +2,16 @@ import com.qidianai.bitmaker.config.IgniteCfg;
 import com.qidianai.bitmaker.config.OKCoinCfg;
 import com.qidianai.bitmaker.config.StrategyCfg;
 import com.qidianai.bitmaker.eventsys.Reactor;
-import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
-import com.qidianai.bitmaker.storage.IgniteManager;
+
 import com.qidianai.bitmaker.strategy.StrategyRunner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
-
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import static sun.misc.PostVMInitHook.run;
 
 
 public class App {
