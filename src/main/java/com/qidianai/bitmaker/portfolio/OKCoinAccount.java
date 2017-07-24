@@ -147,6 +147,10 @@ public class OKCoinAccount extends Account {
 
     }
 
+    public void reSubscribeMarketQuotation() {
+        okCoinClient.reconnect();
+    }
+
     @Override
     public void prepare() {
         Reactor.getInstance().register(EvUserInfo.class, this);

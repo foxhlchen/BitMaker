@@ -10,6 +10,8 @@ import com.qidianai.bitmaker.portfolio.OKCoinAccount;
 import com.qidianai.bitmaker.quote.BollingerBand;
 import com.qidianai.bitmaker.strategy.Strategy;
 
+import java.util.Calendar;
+
 /**********************************************************
  * BitMaker
  *
@@ -25,7 +27,7 @@ public class BollStrategy extends Strategy {
     OKCoinAccount account = new OKCoinAccount();
     BollingerBand bollband = new BollingerBand();
     JsonTicker lastTick = new JsonTicker();
-
+    long lastUpdate = -1;
 
     public void buySignal() {
         log.info("Buy signal is triggered.");
@@ -75,6 +77,17 @@ public class BollStrategy extends Strategy {
     public void run() {
         bollband.update();
         account.update();
+
+        // reconnect
+        long nowMiliSec = Calendar.getInstance().getTimeInMillis();
+        if (lastUpdate != -1) {
+            long nowSec = nowMiliSec / 1000;
+
+            if (nowSec - lastUpdate > 10)
+                account.reSubscribeMarketQuotation();
+
+            return;
+        }
 
         // risk manage
         if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
@@ -140,6 +153,8 @@ public class BollStrategy extends Strategy {
             EvTicker evTicker = (EvTicker) ev;
             JsonTicker ticker = evTicker.getData();
             lastTick = ticker;
+
+            lastUpdate = Calendar.getInstance().getTimeInMillis() / 1000;
         }
     }
 

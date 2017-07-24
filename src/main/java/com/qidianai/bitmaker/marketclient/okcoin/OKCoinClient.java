@@ -47,6 +47,9 @@ public class OKCoinClient {
         log.info("OKCoinClient Connected");
     }
 
+    public void reconnect() {
+        client.reConnect();
+    }
 
     // ------------ Quotation --------------
 
