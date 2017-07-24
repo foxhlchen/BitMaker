@@ -88,10 +88,12 @@ public class BollStrategy extends Strategy {
         switch (marketStatus) {
             case mkNormal: {
                 if (percentB_15min < 0 && percentB_30min < 0) {
+                    log.info("price got into low state.");
                     marketStatus = MarketStatus.mkLower;
                 }
 
                 if (percentB_15min > 1 && percentB_30min > 1) {
+                    log.info("price got into high state.");
                     marketStatus = MarketStatus.mkHigher;
                 }
 
@@ -100,6 +102,8 @@ public class BollStrategy extends Strategy {
             case mkHigher: {
                 if (percentB_30min < 1) {
                     sellSignal();
+
+                    log.info("price got into normal state.");
                     marketStatus = MarketStatus.mkNormal;
                 }
 
@@ -108,6 +112,8 @@ public class BollStrategy extends Strategy {
             case mkLower: {
                 if (percentB_30min > 0) {
                     buySignal();
+
+                    log.info("price got into normal state.");
                     marketStatus = MarketStatus.mkNormal;
                 }
             }
