@@ -87,9 +87,9 @@ public class BollStrategy extends Strategy {
                 log.info("timeout, resubscribe market quotation");
                 account.reSubscribeMarketQuotation();
                 lastUpdate = nowSec;
-            }
 
-            return;
+                return;
+            }
         }
 
         // risk manage
