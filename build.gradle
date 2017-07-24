@@ -43,8 +43,6 @@ dependencies {
 		exclude group: 'org.json', module: 'json'
 	}
 
-	compileOnly 'org.projectlombok:lombok:1.16.18'
-
     compile 'org.apache.httpcomponents:httpcore:4.4.1'
     compile 'org.apache.httpcomponents:httpclient:4.5'
 
