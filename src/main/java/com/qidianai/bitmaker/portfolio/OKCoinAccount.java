@@ -209,7 +209,7 @@ public class OKCoinAccount extends Account {
 
             // Order Finished
             if (order.status == Order.OrderStatus.OrderDone || order.status == Order.OrderStatus.OrderCancelled) {
-                SMTPNotify.send("Order Information " + order.orderId, order.toString());
+                SMTPNotify.send("New Order (" + order.tradedPrice + ") " + order.orderId, order.toString());
                 activeOrderMap.remove(order.orderId);
             }
         }

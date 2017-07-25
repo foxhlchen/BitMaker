@@ -20,25 +20,27 @@ import java.util.Calendar;
  * Date: 2017/7/22
  *
  **********************************************************/
-public class BollStrategy extends Strategy {
-    final double RISK_FACTOR = 0.9;
+public final class BollStrategy extends Strategy {
+    private final double RISK_FACTOR = 0.9;
 
-    MarketStatus marketStatus = MarketStatus.mkNormal;
-    OKCoinAccount account = new OKCoinAccount();
-    BollingerBand bollband = new BollingerBand();
-    JsonTicker lastTick = new JsonTicker();
-    long lastUpdate = -1;
+    private MarketStatus marketStatus = MarketStatus.mkNormal;
+    private OKCoinAccount account = new OKCoinAccount();
+    private BollingerBand bollband = new BollingerBand();
+    private JsonTicker lastTick = new JsonTicker();
+    private long lastUpdate = -1;
 
-    public void buySignal() {
+    private boolean isReported = false;
+
+    private void buySignal() {
         log.info("Buy signal is triggered.");
 
         double availableCny = account.getAvailableCny();
-        if (availableCny > 1) {
+        if (availableCny > lastTick.last * 0.01) {  // Minimum trade volume
             account.buyMarketEth(availableCny);
         }
     }
 
-    public void sellSignal() {
+    private void sellSignal() {
         log.info("Sell signal is triggered.");
 
         double availableEth = account.getAvailableEth();
@@ -47,7 +49,7 @@ public class BollStrategy extends Strategy {
         }
     }
 
-    public void riskSignal() {
+    private void riskSignal() {
         log.warn("Risk signal is triggered.");
 
         SMTPNotify.send("Risk signal", "Risk signal has been triggered at price " + lastTick.last);
@@ -64,6 +66,49 @@ public class BollStrategy extends Strategy {
         }
     }
 
+    public void sendAccountReport() {
+        String reportContent = String.format("Account Total Assets: %.3f, Available Cny: %.3f, Available Eth: %.3f, " +
+                        "Last Price: %.3f",
+                account.getTotalAssetValueCny(lastTick.last), account.getAvailableCny(), account.getAvailableEth(),
+                lastTick.last);
+
+        SMTPNotify.send("AccountReport", reportContent);
+    }
+
+    private void dailyReport(int reportHour, int reportMin) {
+        int nowHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int nowMin = Calendar.getInstance().get(Calendar.MINUTE);
+
+        if (nowHour == reportHour && nowMin == reportMin) {
+            if (!isReported)
+                sendAccountReport();
+            isReported = true;
+        } else {
+            isReported = false;
+        }
+    }
+
+    /**
+     * check market connection and reconnect when connection disrupted.
+     *
+     * @return true for reconnecting
+     */
+    private boolean checkReconnectMarket() {
+        long nowMiliSec = Calendar.getInstance().getTimeInMillis();
+        if (lastUpdate != -1) {
+            long nowSec = nowMiliSec / 1000;
+            if (nowSec - lastUpdate > 30) {
+                log.info("timeout, resubscribe market quotation");
+                account.reSubscribeMarketQuotation();
+                lastUpdate = nowSec;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public void prepare() {
         Reactor.getInstance().register(EvTicker.class, this);
@@ -75,28 +120,25 @@ public class BollStrategy extends Strategy {
 
     @Override
     public void run() {
+        // reconnect
+        if (checkReconnectMarket()) {
+            return;
+        }
+
+        // update market data
         bollband.update();
         account.update();
 
-        // reconnect
-        long nowMiliSec = Calendar.getInstance().getTimeInMillis();
-        if (lastUpdate != -1) {
-            long nowSec = nowMiliSec / 1000;
-
-            if (nowSec - lastUpdate > 30) {
-                log.info("timeout, resubscribe market quotation");
-                account.reSubscribeMarketQuotation();
-                lastUpdate = nowSec;
-
-                return;
-            }
-        }
+        // daily report
+        dailyReport(16, 30);
 
         // risk manage
         if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
             riskSignal();
         }
 
+
+        // trade signal
         double percentB_1min = bollband.getPercentB(lastTick.last, "1min");
         double percentB_5min = bollband.getPercentB(lastTick.last, "5min");
         double percentB_15min = bollband.getPercentB(lastTick.last, "15min");
@@ -139,7 +181,7 @@ public class BollStrategy extends Strategy {
             }
         }
 
-
+        // sleep until next round
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
