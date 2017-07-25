@@ -54,7 +54,7 @@ public class App {
             run();
 
             Reactor.stopAllReactor();
-            strategyRunner.join();
+            strategyRunner.stop();
 
         } catch (IOException e) {
             System.out.println("Error while loading configuration file: " + e.getMessage());

@@ -125,10 +125,6 @@ public final class StrategyRunner implements Runnable{
      * @return Runner instance
      */
     public static StrategyRunner getInstance() {
-        if (instance_ == null) {
-            instance_ = new StrategyRunner();
-        }
-
-        return instance_;
+        return getSingleton();
     }
 }
