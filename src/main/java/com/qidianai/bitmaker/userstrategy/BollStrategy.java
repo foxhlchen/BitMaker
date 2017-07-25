@@ -107,12 +107,12 @@ public class BollStrategy extends Strategy {
 
         switch (marketStatus) {
             case mkNormal: {
-                if (sigLongTerm < 0) {
+                if (sigLongTerm < 0 && sigShortTerm < 0) {
                     log.info("price got into low state.");
                     marketStatus = MarketStatus.mkLower;
                 }
 
-                if (sigShortTerm > 1) {
+                if (sigShortTerm > 1 && sigLongTerm > 1) {
                     log.info("price got into high state.");
                     marketStatus = MarketStatus.mkHigher;
                 }
@@ -130,7 +130,7 @@ public class BollStrategy extends Strategy {
                 break;
             }
             case mkLower: {
-                if (sigLongTerm > 0) {
+                if (sigShortTerm > 0) {
                     buySignal();
 
                     log.info("price got into normal state.");
