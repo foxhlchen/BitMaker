@@ -29,7 +29,7 @@ public class StrategyCfg {
         SingleStrategy singleStrategy = new SingleStrategy();
         singleStrategy.strategyName = strategyName;
         singleStrategy.strategyClass = prop.getProperty(prefix + "class", null);
-        singleStrategy.enable = !prop.getProperty(prefix + "enable", null).equals('0');
+        singleStrategy.enable = !prop.getProperty(prefix + "enable", null).equals("0");
 
         strategyMap.put(strategyName, singleStrategy);
     }
