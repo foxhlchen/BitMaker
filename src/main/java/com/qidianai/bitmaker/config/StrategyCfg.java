@@ -2,6 +2,7 @@ package com.qidianai.bitmaker.config;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,6 +22,28 @@ public class StrategyCfg {
         public String strategyName;
         public String strategyClass;
         public boolean enable;
+        public String args;
+
+        public HashMap<String, String> argv;
+
+        public void load(Properties prop) {
+            String prefix = "strategy." + strategyName + ".args.";
+
+            String argsListString = args;
+            if (args == null) {
+                return;
+            }
+            argv = new HashMap<>();
+            String[] args = argsListString.split(",");
+            for (String arg : args) {
+                String argName = arg.trim();
+                if (argName.isEmpty())
+                    continue;
+
+                String argValue = prop.getProperty(prefix + argName, null);
+                argv.put(argName, argValue);
+            }
+        }
     }
 
 
@@ -30,6 +53,9 @@ public class StrategyCfg {
         singleStrategy.strategyName = strategyName;
         singleStrategy.strategyClass = prop.getProperty(prefix + "class", null);
         singleStrategy.enable = !prop.getProperty(prefix + "enable", null).equals("0");
+
+        singleStrategy.args = prop.getProperty(prefix + "args", null);
+        singleStrategy.load(prop);
 
         strategyMap.put(strategyName, singleStrategy);
     }

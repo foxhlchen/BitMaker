@@ -11,6 +11,7 @@ import com.qidianai.bitmaker.quote.BollingerBand;
 import com.qidianai.bitmaker.strategy.Strategy;
 
 import java.util.Calendar;
+import java.util.HashMap;
 
 /**********************************************************
  * BitMaker
@@ -55,9 +56,7 @@ public final class BollStrategy extends Strategy {
         SMTPNotify.send("Risk signal", "Risk signal has been triggered at price " + lastTick.last);
 
         //cancel all active orders
-        account.getActiveOrderMap().forEach((orderId, order) -> {
-            account.cancelEth(orderId);
-        });
+        account.getActiveOrderMap().forEach((orderId, order) -> account.cancelEth(orderId));
 
         double avalableEth = account.getAvailableEth();
         // sell all ether, close all positions
@@ -110,7 +109,7 @@ public final class BollStrategy extends Strategy {
     }
 
     @Override
-    public void prepare() {
+    public void prepare(HashMap<String, String> args) {
         Reactor.getInstance().register(EvTicker.class, this);
 
         bollband.prepare();

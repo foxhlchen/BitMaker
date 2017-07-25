@@ -1,10 +1,5 @@
 package com.qidianai.bitmaker.eventsys;
 
-/**
- * Created by fox on 2017/7/8.
- */
-
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +7,10 @@ import java.util.HashMap;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+///
+// Created by fox on 2017/7/8.
+//
 
 
 /**
@@ -25,7 +24,7 @@ public final class Reactor implements Runnable {
     private Logger log = LogManager.getLogger(getClass().getName());
     private ReactorEvent rev;
     static private Reactor instance_;
-    static Object instanceLock = new Object();
+    static final Object instanceLock = new Object();
     static HashMap<String, Reactor> reactorMap = new HashMap<>();
 
 
@@ -113,9 +112,7 @@ public final class Reactor implements Runnable {
             return;
 
         ConcurrentHashMap<Long, HandlerBase> handlers = regbook.get(evtype);
-        handlers.forEach((k, v) -> {
-            v.handle(ev);
-        });
+        handlers.forEach((k, v) -> v.handle(ev));
     }
 
 
@@ -268,11 +265,11 @@ public final class Reactor implements Runnable {
     public static void stopAllReactor() {
         stopReactor();
 
-        reactorMap.forEach((k, v) -> {
-            stopReactor(k);
-        });
+        synchronized (instanceLock) {
+            reactorMap.forEach((k, v) -> v.stop());
 
-        reactorMap.clear();
+            reactorMap.clear();
+        }
     }
 
     public static void startReactor() {

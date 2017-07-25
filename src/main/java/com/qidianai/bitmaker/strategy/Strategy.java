@@ -4,6 +4,8 @@ import com.qidianai.bitmaker.eventsys.HandlerBase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+
 /**********************************************************
  * BitMaker
  *
@@ -19,7 +21,7 @@ public abstract class Strategy extends HandlerBase {
     /**
      * Initialize Strategy
      */
-    public abstract void prepare();
+    public abstract void prepare(HashMap<String, String> args);
 
     /**
      * Strategy Logic

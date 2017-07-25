@@ -25,7 +25,7 @@ public final class StrategyRunner implements Runnable{
     private boolean running = false;
     private Logger log = LogManager.getLogger(getClass().getName());
     private Thread t;
-    private LinkedList<StrategyThread> strategyBook = new LinkedList<StrategyThread>();
+    private LinkedList<StrategyThread> strategyBook = new LinkedList<>();
 
 
     /**
@@ -48,15 +48,15 @@ public final class StrategyRunner implements Runnable{
             try {
                 Class<?> clazz = Class.forName("com.qidianai.bitmaker.userstrategy." + v.strategyClass);
                 Constructor<?> ctor = clazz.getConstructor();
-                Object obj = ctor.newInstance(new Object[]{});
+                Object obj = ctor.newInstance();
 
                 Strategy strategy = (Strategy) obj;
                 log.info("Prepare strategy " + k);
-                strategy.prepare();
+                strategy.prepare(v.argv);  // prepare strategy here. so runner can catch exceptions
+
                 StrategyThread strategyThread = new StrategyThread(k, strategy);
                 strategyBook.add(strategyThread);
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                    InstantiationException | InvocationTargetException e) {
+            } catch (Exception e) {
                 log.error("Load Userstrategy " + k + " failed. " + e.getMessage());
             }
 
