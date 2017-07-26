@@ -29,6 +29,7 @@ public final class BollStrategy extends Strategy {
     private BollingerBand bollband = new BollingerBand();
     private JsonTicker lastTick = new JsonTicker();
     private long lastUpdate = -1;
+    private String namespace = className;
 
     private boolean isReported = false;
 
@@ -110,10 +111,14 @@ public final class BollStrategy extends Strategy {
 
     @Override
     public void prepare(HashMap<String, String> args) {
-        Reactor.getInstance().register(EvTicker.class, this);
+        Reactor.getInstance(namespace).register(EvTicker.class, this);
+
+        bollband.setEventDomain(namespace, namespace);
+        account.setEventDomain(namespace, namespace);
 
         bollband.prepare();
         account.prepare();
+
         account.subscribeMarketQuotation();
     }
 
@@ -192,7 +197,7 @@ public final class BollStrategy extends Strategy {
     public void stop() {
         account.exit();
         bollband.stop();
-        Reactor.getInstance().unregister(EvTicker.class, this);
+        Reactor.getInstance(namespace).unregister(EvTicker.class, this);
     }
 
     @Override

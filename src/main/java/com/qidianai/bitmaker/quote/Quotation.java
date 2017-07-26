@@ -20,4 +20,10 @@ public abstract class Quotation extends HandlerBase {
      * stop quotation services
      */
     public abstract void stop();
+
+    /**
+     * set Event Domain
+     */
+    public abstract void setEventDomain(String tag, String namespace);
+
 }

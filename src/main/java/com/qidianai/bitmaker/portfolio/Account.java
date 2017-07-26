@@ -25,4 +25,10 @@ public abstract class Account extends HandlerBase{
      * stop logic
      */
     public abstract void exit();
+
+    /**
+     * set Event Domain
+     */
+    public abstract void setEventDomain(String tag, String namespace);
+
 }

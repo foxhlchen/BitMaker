@@ -23,6 +23,13 @@ import java.util.ArrayList;
 public class WebSocketHandler implements WebSocketService {
 
     private Logger log = LogManager.getLogger(getClass().getName());
+    String tag;
+    String namespace;
+
+    WebSocketHandler(String tag, String namespace) {
+        this.tag = tag;
+        this.namespace = namespace;
+    }
 
     @Override
     public void onReceive(String msg) {
@@ -50,7 +57,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvTicker evTicker = new EvTicker();
                     evTicker.setData(tickerData);
-                    Reactor.getSingleton().publish(evTicker);
+                    evTicker.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evTicker);
 
                     break;
                 }
@@ -83,7 +91,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvResult evt = new EvResult();
                     evt.setData(result);
-                    Reactor.getSingleton().publish(evt);
+                    evt.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evt);
 
                     break;
                 }
@@ -105,7 +114,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvResult evt = new EvResult();
                     evt.setData(result);
-                    Reactor.getSingleton().publish(evt);
+                    evt.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evt);
 
                     break;
                 }
@@ -157,7 +167,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvKline evKline = new EvKline();
                     evKline.setData(batch);
-                    Reactor.getSingleton().publish(evKline);
+                    evKline.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evKline);
 
                     break;
                 }
@@ -175,7 +186,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvUserInfo evt = new EvUserInfo();
                     evt.setData(data);
-                    Reactor.getSingleton().publish(evt);
+                    evt.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evt);
 
                     break;
                 }
@@ -197,7 +209,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvResult evt = new EvResult();
                     evt.setData(result);
-                    Reactor.getSingleton().publish(evt);
+                    evt.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evt);
 
                     break;
                 }
@@ -219,7 +232,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvResult evt = new EvResult();
                     evt.setData(result);
-                    Reactor.getSingleton().publish(evt);
+                    evt.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evt);
 
                     break;
                 }
@@ -233,7 +247,8 @@ public class WebSocketHandler implements WebSocketService {
 
                     EvOrder evt = new EvOrder();
                     evt.setData(data);
-                    Reactor.getSingleton().publish(evt);
+                    evt.setTag(tag);
+                    Reactor.getSingleton(namespace).publish(evt);
 
                     break;
                 }

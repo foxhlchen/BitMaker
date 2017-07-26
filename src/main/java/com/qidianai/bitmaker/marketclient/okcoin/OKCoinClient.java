@@ -24,6 +24,8 @@ public class OKCoinClient {
     private IStockRestApi restApi;
     private WebSocketClient client;
     private Logger log = LogManager.getLogger(getClass().getName());
+    private String tag;
+    private String namespace;
 
     public OKCoinClient() {}
 
@@ -38,8 +40,14 @@ public class OKCoinClient {
         this.url = url;
     }
 
+    public void setEventDomain(String tag, String namespace) {
+        this.tag = tag;
+        this.namespace = namespace;
+    }
+
+    // ------------ Connect market --------
     public void connect() {
-        client = new WebSocketClient(url, new WebSocketHandler());
+        client = new WebSocketClient(url, new WebSocketHandler(tag, namespace));
         client.setKey(apiKey, secretKey);
         restApi =  new StockRestApi("https://www.okcoin.cn", apiKey, secretKey);
 

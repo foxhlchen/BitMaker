@@ -8,6 +8,24 @@ public class Event<T> {
     protected Object sender = null;
 
     protected String name = "";
+    protected String tag;
+
+    public Event() {
+
+    }
+
+    public Event(Object s, T d) {
+        sender = s;
+        data = d;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
     public Object getSender() {
         return sender;
@@ -17,23 +35,12 @@ public class Event<T> {
         this.sender = sender;
     }
 
-
     public T getData() {
         return data;
     }
 
     public void setData(T data) {
         this.data = data;
-    }
-
-
-    public Event() {
-
-    }
-
-    public Event(Object s, T d) {
-        sender = s;
-        data = d;
     }
 
     public Class getType() {

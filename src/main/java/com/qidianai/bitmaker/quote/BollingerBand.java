@@ -51,7 +51,7 @@ class BandQueue extends ArrayDeque<JsonKline> {
     double upperBand = Double.MAX_VALUE;
     double lowerBand = Double.MIN_NORMAL;
 
-    ArrayList<Double> diffArray = new ArrayList<Double>(N + 5);
+    ArrayList<Double> diffArray = new ArrayList<>(N + 5);
 
     BandQueue() {
         super(N + 5);
@@ -60,7 +60,6 @@ class BandQueue extends ArrayDeque<JsonKline> {
     /**
      * Add kline data to history queue
      *
-     * @param jsonKline
      */
     void pushKline(JsonKline jsonKline) {
         JsonKline first = peekFirst();
@@ -165,6 +164,9 @@ class BandQueue extends ArrayDeque<JsonKline> {
 }
 
 public class BollingerBand extends Quotation {
+    String tag;
+    String namespace;
+
     protected Logger log = LogManager.getLogger(getClass().getName());
     protected BandQueue histKline15m = new BandQueue();
     protected BandQueue histKline30m = new BandQueue();
@@ -318,8 +320,8 @@ public class BollingerBand extends Quotation {
 
     @Override
     public void prepare() {
-        //Reactor.getInstance().register(EvTicker.class, this);
-        Reactor.getInstance().register(EvKline.class, this);
+        //Reactor.getInstance(namespace).register(EvTicker.class, this);
+        Reactor.getInstance(namespace).register(EvKline.class, this);
     }
 
     @Override
@@ -332,6 +334,12 @@ public class BollingerBand extends Quotation {
 
     @Override
     public void stop() {
-        Reactor.getInstance().unregister(EvKline.class, this);
+        Reactor.getInstance(namespace).unregister(EvKline.class, this);
+    }
+
+    @Override
+    public void setEventDomain(String tag, String namespace) {
+        this.tag = tag;
+        this.namespace = namespace;
     }
 }

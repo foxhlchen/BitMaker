@@ -31,6 +31,8 @@ public class OKCoinAccount extends Account {
     private String apiKey = OKCoinCfg.apiKey;
     private String secretKey = OKCoinCfg.secretKey;
     private String url = OKCoinCfg.url;
+    private String tag;
+    private String namespace;
 
     private JsonUserInfo lastUserInfo;
     private ConcurrentHashMap<String, Order> orderMap = new ConcurrentHashMap<>();
@@ -135,6 +137,7 @@ public class OKCoinAccount extends Account {
             // stop client
         }
         okCoinClient = new OKCoinClient(apiKey, secretKey, url);
+        okCoinClient.setEventDomain(tag, namespace);
         okCoinClient.connect();
         okCoinClient.login();
     }
@@ -154,8 +157,8 @@ public class OKCoinAccount extends Account {
 
     @Override
     public void prepare() {
-        Reactor.getInstance().register(EvUserInfo.class, this);
-        Reactor.getInstance().register(EvOrder.class, this);
+        Reactor.getInstance(namespace).register(EvUserInfo.class, this);
+        Reactor.getInstance(namespace).register(EvOrder.class, this);
 
         connectMarket();
         queryUserInfo();
@@ -180,8 +183,14 @@ public class OKCoinAccount extends Account {
 
     @Override
     public void exit() {
-        Reactor.getInstance().unregister(EvUserInfo.class, this);
-        Reactor.getInstance().unregister(EvOrder.class, this);
+        Reactor.getInstance(namespace).unregister(EvUserInfo.class, this);
+        Reactor.getInstance(namespace).unregister(EvOrder.class, this);
+    }
+
+    @Override
+    public void setEventDomain(String tag, String namespace) {
+        this.tag = tag;
+        this.namespace = namespace;
     }
 
     @Override
