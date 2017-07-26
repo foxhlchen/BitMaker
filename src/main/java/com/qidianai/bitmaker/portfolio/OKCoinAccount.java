@@ -172,7 +172,7 @@ public class OKCoinAccount extends Account {
                 initialCny = availableCny;
             }
 
-            if (availableEth < 0.001) {
+            if (availableEth < 0.01) {
                 initialCny = availableCny;
             }
         }

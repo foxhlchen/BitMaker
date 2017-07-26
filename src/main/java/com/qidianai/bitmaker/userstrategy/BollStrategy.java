@@ -45,7 +45,7 @@ public final class BollStrategy extends Strategy {
         log.info("Sell signal is triggered.");
 
         double availableEth = account.getAvailableEth();
-        if (availableEth >= 0.001) {
+        if (availableEth >= 0.01) {
             account.sellMarketEth(availableEth);
         }
     }

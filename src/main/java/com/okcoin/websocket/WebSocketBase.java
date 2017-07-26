@@ -308,7 +308,7 @@ public abstract class WebSocketBase {
 			signPreMap.put("price", price);
 		}
 		if (amount != null) {
-			signPreMap.put("quantity", amount);
+			signPreMap.put("amount", amount);
 		}
 		signPreMap.put("type", type);
 		String preStr = MD5Util.createLinkString(signPreMap);
