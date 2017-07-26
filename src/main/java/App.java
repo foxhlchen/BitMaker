@@ -31,7 +31,8 @@ public class App {
 
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.out.println("need argument <config file>");
+            System.out.println("usage: Java App <config file>");
+            System.out.println("BitMaker v0.01 072601");
             System.exit(-1);
         }
 
