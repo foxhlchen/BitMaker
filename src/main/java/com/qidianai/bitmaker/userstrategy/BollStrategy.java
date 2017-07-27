@@ -5,7 +5,6 @@ import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonTicker;
 import com.qidianai.bitmaker.notification.SMTPNotify;
-import com.qidianai.bitmaker.portfolio.Account;
 import com.qidianai.bitmaker.portfolio.OKCoinAccount;
 import com.qidianai.bitmaker.quote.BollingerBand;
 import com.qidianai.bitmaker.strategy.Strategy;
@@ -30,6 +29,7 @@ public final class BollStrategy extends Strategy {
     private JsonTicker lastTick = new JsonTicker();
     private long lastUpdate = -1;
     private String namespace = className;
+    private boolean riskProtect = false;
 
     private boolean isReported = false;
 
@@ -64,6 +64,8 @@ public final class BollStrategy extends Strategy {
         if (account.getAvailableEth() >= 0.001) {
             account.sellMarketEth(avalableEth);
         }
+
+        riskProtect = true;
     }
 
     public void sendAccountReport() {
@@ -75,14 +77,21 @@ public final class BollStrategy extends Strategy {
         SMTPNotify.send("AccountReport", reportContent);
     }
 
-    private void dailyReport(int reportHour, int reportMin) {
+    private void dayChange(int reportHour, int reportMin) {
         int nowHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         int nowMin = Calendar.getInstance().get(Calendar.MINUTE);
 
         if (nowHour == reportHour && nowMin == reportMin) {
+            ////////change day
+
+            // close risk protection
+            riskProtect = false;
+
+            // send account report
             if (!isReported)
                 sendAccountReport();
             isReported = true;
+
         } else {
             isReported = false;
         }
@@ -133,14 +142,18 @@ public final class BollStrategy extends Strategy {
         bollband.update();
         account.update();
 
-        // daily report
-        dailyReport(16, 30);
+        // change trade day
+        dayChange(17, 00);
 
         // risk manage
         if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
             riskSignal();
         }
 
+        // risk protection, stop trading
+        if (riskProtect) {
+            return;
+        }
 
         // trade signal
         double percentB_1min = bollband.getPercentB(lastTick.last, "1min");
