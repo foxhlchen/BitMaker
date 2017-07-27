@@ -22,6 +22,8 @@ public class StrategyCfg {
         public String strategyName;
         public String strategyClass;
         public boolean enable;
+        public int timeout;
+
         public String args;
 
         public HashMap<String, String> argv;
@@ -53,6 +55,7 @@ public class StrategyCfg {
         singleStrategy.strategyName = strategyName;
         singleStrategy.strategyClass = prop.getProperty(prefix + "class", null);
         singleStrategy.enable = !prop.getProperty(prefix + "enable", null).equals("0");
+        singleStrategy.timeout = Integer.parseInt(prop.getProperty(prefix + "timeout", "30"));
 
         singleStrategy.args = prop.getProperty(prefix + "args", null);
         singleStrategy.load(prop);

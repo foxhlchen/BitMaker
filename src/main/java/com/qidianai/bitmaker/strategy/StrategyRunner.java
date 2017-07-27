@@ -7,7 +7,9 @@ import com.qidianai.bitmaker.userstrategy.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**********************************************************
@@ -55,6 +57,8 @@ public final class StrategyRunner implements Runnable{
                 strategy.prepare(v.argv);  // prepare strategy here. so runner can catch exceptions
 
                 StrategyThread strategyThread = new StrategyThread(k, strategy);
+                strategyThread.setTimeout(v.timeout);
+                strategyThread.setStrategyCfg(v);
                 strategyBook.add(strategyThread);
             } catch (Exception e) {
                 log.error("Load Userstrategy " + k + " failed. " + e.getMessage());
@@ -100,7 +104,42 @@ public final class StrategyRunner implements Runnable{
 
         while (running) {
             try {
-                Thread.sleep(10);
+                ListIterator<StrategyThread> iter = strategyBook.listIterator();
+                while (iter.hasNext()) {
+                    StrategyThread t = iter.next();
+                    if (!t.isAlive()) {
+                        log.error("strategy thread timeout detected  " + t.getStrategyCfg().strategyName);
+                        t.forceStop();
+                        iter.remove();
+
+                        StrategyCfg.SingleStrategy v = t.getStrategyCfg();
+                        String k = v.strategyName;
+                        try {
+                            Class<?> clazz = Class.forName("com.qidianai.bitmaker.userstrategy." + v.strategyClass);
+                            Constructor<?> ctor = clazz.getConstructor();
+                            Object obj = ctor.newInstance();
+
+                            Strategy strategy = (Strategy) obj;
+                            log.info("Prepare strategy " + k);
+                            strategy.prepare(v.argv);  // prepare strategy here. so runner can catch exceptions
+
+                            StrategyThread strategyThread = new StrategyThread(k, strategy);
+                            strategyThread.setTimeout(v.timeout);
+                            strategyThread.setStrategyCfg(v);
+                            strategyBook.add(strategyThread);
+
+                            strategyThread.start();
+                        } catch (Exception e) {
+                            log.error("Restart Userstrategy " + k + " failed. " + e.getMessage());
+                        }
+
+                        break;
+                    }
+
+                }
+
+
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.error("Runner.run " + e.getMessage());
             }
