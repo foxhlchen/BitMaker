@@ -72,6 +72,7 @@ public final class StrategyRunner implements Runnable{
 
         running = true;
         t = new Thread(this);
+        t.setName("StrategyRunner");
         t.start();
     }
 
