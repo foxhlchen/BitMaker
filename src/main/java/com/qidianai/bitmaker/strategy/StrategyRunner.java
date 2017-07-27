@@ -1,16 +1,20 @@
 package com.qidianai.bitmaker.strategy;
 
 import com.qidianai.bitmaker.config.StrategyCfg;
+import com.qidianai.bitmaker.notification.SMTPNotify;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.qidianai.bitmaker.userstrategy.*;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
+
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 /**********************************************************
  * BitMaker
@@ -104,10 +108,15 @@ public final class StrategyRunner implements Runnable{
 
         while (running) {
             try {
+                PrintWriter statusFile = new PrintWriter("strategy.status", "UTF-8");
+                long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
+                statusFile.println(String.format("%d", nowSec));
+
                 ListIterator<StrategyThread> iter = strategyBook.listIterator();
                 while (iter.hasNext()) {
                     StrategyThread t = iter.next();
                     if (!t.isAlive()) {
+                        statusFile.println(String.format("%s %d Dead", t.getStrategyCfg().strategyName, t.getLastTick()));
                         log.error("strategy thread timeout detected  " + t.getStrategyCfg().strategyName);
                         t.forceStop();
                         iter.remove();
@@ -126,22 +135,27 @@ public final class StrategyRunner implements Runnable{
                             StrategyThread strategyThread = new StrategyThread(k, strategy);
                             strategyThread.setTimeout(v.timeout);
                             strategyThread.setStrategyCfg(v);
-                            strategyBook.add(strategyThread);
+                            iter.add(strategyThread);
 
                             strategyThread.start();
                         } catch (Exception e) {
                             log.error("Restart Userstrategy " + k + " failed. " + e.getMessage());
+                            SMTPNotify.send("Strategy " + v.strategyName + " Restart error",
+                                    "Strategy " + v.strategyName + " restart error");
                         }
-
-                        break;
                     }
 
+                    statusFile.println(String.format("%s %d Alive", t.getStrategyCfg().strategyName, t.getLastTick()));
                 }
 
-
+                statusFile.close();
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.error("Runner.run " + e.getMessage());
+                e.printStackTrace();
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                log.error("Write status file error " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
