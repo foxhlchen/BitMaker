@@ -32,10 +32,11 @@ public class App {
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("usage: Java App <config file>");
-            System.out.println("BitMaker v0.02 072702");
+            System.out.println("BitMaker v0.02 072704");
             System.exit(-1);
         }
 
+        System.out.println("Starting BitMaker From " + System.getProperty("user.dir"));
 
         try {
             Properties prop = new Properties();
@@ -47,7 +48,7 @@ public class App {
             StrategyCfg.load(prop);
 
             //IgniteManager.startIgnite(IgniteCfg.cfgpath);
-            Reactor.startReactor();
+            //Reactor.startReactor();
 
             StrategyRunner strategyRunner = StrategyRunner.getInstance();
             strategyRunner.start();
