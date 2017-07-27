@@ -106,7 +106,7 @@ public final class BollStrategy extends Strategy {
         long nowMiliSec = Calendar.getInstance().getTimeInMillis();
         if (lastUpdate != -1) {
             long nowSec = nowMiliSec / 1000;
-            if (nowSec - lastUpdate > 30) {
+            if (nowSec - lastUpdate > 180) {
                 log.info("timeout, resubscribe market quotation");
                 account.reSubscribeMarketQuotation();
                 lastUpdate = nowSec;
