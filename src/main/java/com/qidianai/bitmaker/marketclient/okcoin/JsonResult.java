@@ -9,8 +9,8 @@ package com.qidianai.bitmaker.marketclient.okcoin;
  *
  **********************************************************/
 public class JsonResult {
-    boolean result;
-    String order_id;
-    String channel;
-    int error_code;
+    public boolean result;
+    public String order_id;
+    public String channel;
+    public int error_code;
 }

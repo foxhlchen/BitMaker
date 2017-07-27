@@ -2,11 +2,13 @@ package com.qidianai.bitmaker.portfolio;
 
 import com.qidianai.bitmaker.config.OKCoinCfg;
 import com.qidianai.bitmaker.event.EvOrder;
+import com.qidianai.bitmaker.event.EvResult;
 import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.event.EvUserInfo;
 import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonOrder;
+import com.qidianai.bitmaker.marketclient.okcoin.JsonResult;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonUserInfo;
 import com.qidianai.bitmaker.marketclient.okcoin.OKCoinClient;
 import com.qidianai.bitmaker.notification.SMTPNotify;
@@ -14,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**********************************************************
@@ -83,8 +86,8 @@ public class OKCoinAccount extends Account {
     public void buyEth(double price, double amount) {
         log.warn("Buy eth " + price + " " + amount);
 
-        String priceStr = String.format("%.3f", price);
-        String amountStr = String.format("%.3f", amount);
+        String priceStr = String.format("%.6f", price);
+        String amountStr = String.format("%.6f", amount);
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "buy");
     }
@@ -92,8 +95,8 @@ public class OKCoinAccount extends Account {
     public void sellEth(double price, double amount) {
         log.warn("Sell eth " + price + " " + amount);
 
-        String priceStr = String.format("%.3f", price);
-        String amountStr = String.format("%.3f", amount);
+        String priceStr = String.format("%.6f", price);
+        String amountStr = String.format("%.6f", amount);
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "sell");
     }
@@ -101,7 +104,7 @@ public class OKCoinAccount extends Account {
     public void buyMarketEth(double price) {
         log.warn("Buy eth (market) " + price);
 
-        String priceStr = String.format("%.3f", price);
+        String priceStr = String.format("%.6f", price);
         String amountStr = null;
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "buy_market");
@@ -111,7 +114,7 @@ public class OKCoinAccount extends Account {
         log.warn("Sell eth (market) "  + amount);
 
         String priceStr = null;
-        String amountStr = String.format("%.3f", amount);
+        String amountStr = String.format("%.6f", amount);
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "sell_market");
     }
@@ -220,6 +223,18 @@ public class OKCoinAccount extends Account {
             if (order.status == Order.OrderStatus.OrderDone || order.status == Order.OrderStatus.OrderCancelled) {
                 SMTPNotify.send("New Order (" + order.tradedPrice + ") " + order.orderId, order.toString());
                 activeOrderMap.remove(order.orderId);
+            }
+        } else if (ev.getType() == EvResult.class) {
+            EvResult evt = (EvResult) ev;
+            JsonResult data = evt.getData();
+
+            if (data.channel.equals("ok_spotcny_trade")) {
+                if (data.result) {
+                    log.info("new order created " + data.order_id);
+                } else {
+                    log.info("new order created failed. error_code" + data.error_code);
+                    SMTPNotify.send("Order Failure " + data.error_code, "Order Failure " + data.error_code);
+                }
             }
         }
     }
