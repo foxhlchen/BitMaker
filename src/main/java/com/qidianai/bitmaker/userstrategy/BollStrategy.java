@@ -124,6 +124,10 @@ public final class BollStrategy extends Strategy {
 
     @Override
     public void prepare(HashMap<String, String> args) {
+        if (args.containsKey("namespace")) {
+            this.namespace = args.get("namespace");
+        }
+
         Reactor.getInstance(namespace).register(EvTicker.class, this);
 
         bollband.setEventDomain(namespace, namespace);

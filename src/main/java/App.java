@@ -36,6 +36,7 @@ public class App {
             System.exit(-1);
         }
 
+        System.out.println("Starting BitMaker From " + System.getProperty("user.dir"));
 
         try {
             Properties prop = new Properties();
@@ -47,7 +48,7 @@ public class App {
             StrategyCfg.load(prop);
 
             //IgniteManager.startIgnite(IgniteCfg.cfgpath);
-            Reactor.startReactor();
+            //Reactor.startReactor();
 
             StrategyRunner strategyRunner = StrategyRunner.getInstance();
             strategyRunner.start();

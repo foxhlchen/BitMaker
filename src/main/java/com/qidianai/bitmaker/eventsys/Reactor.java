@@ -38,7 +38,7 @@ public final class Reactor implements Runnable {
 
     /**
      * set reactor event handler
-     * @param rev
+     * @param rev handler
      */
     public void setRev(ReactorEvent rev) {
         this.rev = rev;
@@ -48,8 +48,8 @@ public final class Reactor implements Runnable {
     /**
      * To subscribe event
      *
-     * @param evtype
-     * @param hdr
+     * @param evtype event type
+     * @param hdr handler
      */
     public void register(Class evtype, HandlerBase hdr) {
         log.info(String.format("Subscribe %s by %s uid %d", evtype.getName(), hdr.getClass().getName(), hdr.getUid()));
@@ -65,8 +65,8 @@ public final class Reactor implements Runnable {
 
     /**
      * To unsubscribe event
-     * @param evtype
-     * @param hdr
+     * @param evtype event type
+     * @param hdr handler
      */
     public void unregister(Class evtype, HandlerBase hdr) {
         log.info(String.format("Unsubscribe %s by %s uid %d", evtype.getName(), hdr.getClass().getName(), hdr.getUid()));
@@ -95,7 +95,7 @@ public final class Reactor implements Runnable {
 
     /**
      * Store event in EvQ, then publish event from Reactor thread
-     * @param ev
+     * @param ev event
      */
     public void publish(Event<?> ev) {
         evQ.add(ev);
@@ -135,6 +135,18 @@ public final class Reactor implements Runnable {
 
         running = true;
         t = new Thread(this);
+        t.start();
+    }
+
+    /**
+     * Create Another thread and Run Reactor.
+     */
+    private void start(String namespace) {
+        log.info("Start Reactor");
+
+        running = true;
+        t = new Thread(this);
+        t.setName(namespace);
         t.start();
     }
 
@@ -230,7 +242,7 @@ public final class Reactor implements Runnable {
         synchronized (instanceLock) {
             if (! reactorMap.containsKey(namespace)) {
                 Reactor r = new Reactor();
-                r.start();
+                r.start(namespace);
                 reactorMap.put(namespace, r);
             }
 

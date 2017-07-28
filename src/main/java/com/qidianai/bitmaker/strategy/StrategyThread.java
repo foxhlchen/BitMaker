@@ -69,6 +69,7 @@ public class StrategyThread extends HandlerBase implements Runnable {
 
         running = true;
         t = new Thread(this);
+        t.setName("StrategyThread-" + this.strategyName);
         t.start();
     }
 
