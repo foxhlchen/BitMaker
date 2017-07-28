@@ -108,7 +108,11 @@ public final class BollStrategy extends Strategy {
             long nowSec = nowMiliSec / 1000;
             if (nowSec - lastUpdate > 180) {
                 log.info("timeout, resubscribe market quotation");
-                account.reSubscribeMarketQuotation();
+
+                account.connectMarket();
+                account.subscribeMarketQuotation();
+                account.queryUserInfo();
+
                 lastUpdate = nowSec;
 
                 return true;

@@ -32,7 +32,7 @@ public class App {
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("usage: Java App <config file>");
-            System.out.println("BitMaker v0.02 072702");
+            System.out.println("BitMaker v0.02 072801");
             System.exit(-1);
         }
 
