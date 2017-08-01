@@ -74,7 +74,7 @@ public class App {
             StrategyRunner strategyRunner = StrategyRunner.getInstance();
             strategyRunner.start();
 
-            SMTPNotify.send("BitMaker Start", "From " + System.getProperty("user.dir") + " at " + hostname);
+            //SMTPNotify.send("BitMaker Start", "From " + System.getProperty("user.dir") + " at " + hostname);
             run();
 
             Reactor.stopAllReactor();

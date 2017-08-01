@@ -31,6 +31,14 @@ class BandQueue extends ArrayDeque<JsonKline> {
      * band magnification, K times std over average
      */
     static final int K = 2;
+    final Object dataLock = new Object();
+    double upperBand = Double.MAX_VALUE;
+    double lowerBand = Double.MIN_NORMAL;
+    ArrayList<Double> diffArray = new ArrayList<>(N + 5);
+
+    BandQueue() {
+        super(N + 5);
+    }
 
     public double getUpperBand() {
         return upperBand;
@@ -48,39 +56,31 @@ class BandQueue extends ArrayDeque<JsonKline> {
         this.lowerBand = lowerBand;
     }
 
-    double upperBand = Double.MAX_VALUE;
-    double lowerBand = Double.MIN_NORMAL;
-
-    ArrayList<Double> diffArray = new ArrayList<>(N + 5);
-
-    BandQueue() {
-        super(N + 5);
-    }
-
     /**
      * Add kline data to history queue
-     *
      */
     void pushKline(JsonKline jsonKline) {
-        JsonKline first = peekFirst();
+        synchronized (dataLock) {
+            JsonKline first = peekFirst();
 
-        if (first != null) {
-            // abandon old kline
-            if (jsonKline.getDateInt() < first.getDateInt()) {
-                return;
+            if (first != null) {
+                // abandon old kline
+                if (jsonKline.getDateInt() < first.getDateInt()) {
+                    return;
+                }
+
+                // update latest kline
+                if (jsonKline.getDateInt() == first.getDateInt()) {
+                    first.update(jsonKline);
+                    return;
+                }
             }
 
-            // update latest kline
-            if (jsonKline.getDateInt() == first.getDateInt()) {
-                first.update(jsonKline);
-                return;
+            push(jsonKline);
+
+            while (size() > N) {
+                removeLast();
             }
-        }
-
-        push(jsonKline);
-
-        while (size() > N) {
-            removeLast();
         }
     }
 
@@ -117,10 +117,12 @@ class BandQueue extends ArrayDeque<JsonKline> {
      */
     private double calculateMean() {
         double sum = 0;
-        for (JsonKline kline : this) {
-            double val = kline.closePrice; //(kline.highPrice - kline.lowPrice) / 2 + kline.lowPrice;
+        synchronized (dataLock) {
+            for (JsonKline kline : this) {
+                double val = kline.closePrice; //(kline.highPrice - kline.lowPrice) / 2 + kline.lowPrice;
 
-            sum += val;
+                sum += val;
+            }
         }
 
         return sum / size();
@@ -136,10 +138,12 @@ class BandQueue extends ArrayDeque<JsonKline> {
         diffArray.clear();
 
         double mean = calculateMean();
-        for (JsonKline kline : this) {
-            double val = kline.closePrice; //(kline.highPrice - kline.lowPrice) / 2 + kline.lowPrice;
+        synchronized (dataLock) {
+            for (JsonKline kline : this) {
+                double val = kline.closePrice; //(kline.highPrice - kline.lowPrice) / 2 + kline.lowPrice;
 
-            diffArray.add(Math.pow(val - mean, 2));
+                diffArray.add(Math.pow(val - mean, 2));
+            }
         }
 
         double variance = 0;
@@ -164,20 +168,17 @@ class BandQueue extends ArrayDeque<JsonKline> {
 }
 
 public class BollingerBand extends Quotation {
-    String tag;
-    String namespace;
-
+    /**
+     * default round decimal places
+     */
+    public static final int RoundPlaces = 3;
     protected Logger log = LogManager.getLogger(getClass().getName());
     protected BandQueue histKline15m = new BandQueue();
     protected BandQueue histKline30m = new BandQueue();
     protected BandQueue histKline1m = new BandQueue();
     protected BandQueue histKline5m = new BandQueue();
-
-    /**
-     * default round decimal places
-     */
-    public static final int RoundPlaces = 3;
-
+    String tag;
+    String namespace;
 
     public static double round(double num) {
         return round(num, RoundPlaces);
