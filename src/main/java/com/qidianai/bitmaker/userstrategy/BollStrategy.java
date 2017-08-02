@@ -32,6 +32,7 @@ public final class BollStrategy extends Strategy {
     private long lastUpdate = -1;
     private String namespace = className;
     private boolean riskProtect = false;
+    private long enterSec = 0;
 
     private boolean isReported = false;
 
@@ -125,6 +126,8 @@ public final class BollStrategy extends Strategy {
     }
 
     private void doTrade() {
+        long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
+        long elapsed = nowSec - enterSec;
         double sigShortTerm = bollband.getPercentB(lastTick.last, "15min");
         double sigLongTerm = bollband.getPercentB(lastTick.last, "30min");
 
@@ -133,34 +136,65 @@ public final class BollStrategy extends Strategy {
         switch (marketStatus) {
             case mkNormal: {
                 if (sigLongTerm < 0 && sigShortTerm < 0) {
-                    log.info("price got into low state.");
+                    log.info("price get into low state.");
                     marketStatus = MarketStatus.mkLower;
+                    enterSec = nowSec;
                 }
 
                 if (sigShortTerm > 1 && sigLongTerm > 1) {
-                    log.info("price got into high state.");
+                    log.info("price get into high state.");
                     marketStatus = MarketStatus.mkHigher;
+                    enterSec = nowSec;
                 }
 
                 break;
             }
             case mkHigher: {
-                if (sigShortTerm < 1 && macd15 < 0) {
+                if (sigShortTerm > 1) {
+                    enterSec = nowSec;
+                }
+
+                // sell signal
+                if (sigShortTerm < 1 && sigShortTerm > 0.5 && macd15 < -1.5) {
                     sellSignal();
 
-                    log.info("price got into normal state.");
+                    log.info("price get into normal state.");
                     marketStatus = MarketStatus.mkNormal;
+                    enterSec = nowSec;
+                }
+
+                // dismiss higher state
+                if (elapsed > 3600 || sigShortTerm < 0.5) {
+                    log.info("higher state dismiss.");
+                    marketStatus = MarketStatus.mkNormal;
+                    enterSec = nowSec;
                 }
 
                 break;
             }
             case mkLower: {
-                if (sigShortTerm > 0 && macd15 > 0) {
+                if (sigShortTerm < 1) {
+                    enterSec = nowSec;
+                }
+
+                // buy signal
+                if (sigShortTerm > 0 && sigShortTerm < 0.5 && macd15 > 1.5) {
                     buySignal();
 
-                    log.info("price got into normal state.");
+                    log.info("price get into normal state.");
                     marketStatus = MarketStatus.mkNormal;
+                    enterSec = nowSec;
                 }
+
+                // dismiss lower state
+                if (elapsed > 3600 || sigShortTerm > 0.5) {
+                    log.info("low state dismiss.");
+                    marketStatus = MarketStatus.mkNormal;
+                    enterSec = nowSec;
+                }
+
+
+                break;
             }
         }
     }
