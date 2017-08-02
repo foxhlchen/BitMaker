@@ -165,7 +165,7 @@ public final class BollStrategy extends Strategy {
 
 
                 // dismiss higher state
-                if (elapsed > 3600) {
+                if (elapsed > 5400) {
                     log.info("higher state dismiss.");
                     marketStatus = MarketStatus.mkNormal;
                     enterSec = nowSec;
