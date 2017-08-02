@@ -221,6 +221,13 @@ public final class BollStrategy extends Strategy {
 
     @Override
     public void run() {
+        // sleep until next round
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         // reconnect
         if (checkReconnectMarket()) {
             return;
@@ -246,13 +253,6 @@ public final class BollStrategy extends Strategy {
 
         // trade signal
         doTrade();
-
-        // sleep until next round
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
