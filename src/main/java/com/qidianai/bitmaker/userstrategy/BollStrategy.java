@@ -163,8 +163,9 @@ public final class BollStrategy extends Strategy {
                     enterSec = nowSec;
                 }
 
+
                 // dismiss higher state
-                if (elapsed > 3600 || sigShortTerm < 0.5) {
+                if (elapsed > 3600) {
                     log.info("higher state dismiss.");
                     marketStatus = MarketStatus.mkNormal;
                     enterSec = nowSec;
@@ -187,7 +188,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // dismiss lower state
-                if (elapsed > 3600 || sigShortTerm > 0.5) {
+                if (elapsed > 3600 || sigShortTerm > 0.65) {
                     log.info("low state dismiss.");
                     marketStatus = MarketStatus.mkNormal;
                     enterSec = nowSec;
