@@ -1,10 +1,20 @@
 package com.qidianai.bitmaker.marketclient.okcoin;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.okcoin.rest.stock.IStockRestApi;
 import com.okcoin.rest.stock.impl.StockRestApi;
 import com.okcoin.websocket.WebSocketService;
+import com.qidianai.bitmaker.event.EvKline;
+import com.qidianai.bitmaker.eventsys.Reactor;
+import org.apache.http.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.util.ArrayList;
 
 
 /**********************************************************
@@ -60,6 +70,65 @@ public class OKCoinClient {
     }
 
     // ------------ Quotation --------------
+
+    public void getKlineEth(String type, String size, String since) {
+        String ret = null;
+
+        try {
+            ret = restApi.kLine(type, "eth_cny", size, since);
+        } catch (HttpException|IOException e) {
+            e.printStackTrace();
+        }
+
+        if (ret.charAt(0) == '{')
+            log.error("Get Kline " + type + " Failed. " + ret);
+
+        if (ret == null)
+            return;
+
+        Type datatype = new TypeToken<ArrayList<ArrayList<String>>>() {
+        }.getType();
+        Gson gson = new Gson();
+        ArrayList<ArrayList<String>> data = gson.fromJson(ret, datatype);
+
+        JsonKline.KlinePeriod period = JsonKline.KlinePeriod.kLineNone;
+        switch (type) {
+            case "1min":
+                period = JsonKline.KlinePeriod.kLine1Min;
+
+                break;
+            case "5min":
+                period = JsonKline.KlinePeriod.kLine5Min;
+
+                break;
+            case "15min":
+                period = JsonKline.KlinePeriod.kLine15Min;
+
+                break;
+            case "30min":
+                period = JsonKline.KlinePeriod.kLine30Min;
+
+                break;
+        }
+
+        JsonKlineBatch batch = new JsonKlineBatch();
+        for (ArrayList<String> kline : data) {
+            JsonKline jsonKline = new JsonKline();
+            try {
+                jsonKline.load(period, kline);
+            } catch (ParseException e) {
+                log.error("Kline parse timestamp error " + e.getMessage());
+            }
+            batch.add(jsonKline);
+        }
+
+        System.out.println();
+
+        EvKline evKline = new EvKline();
+        evKline.setData(batch);
+        evKline.setTag(tag);
+        Reactor.getSingleton(namespace).publish(evKline);
+    }
 
     public boolean subTickerEth() {
         if (client == null) {

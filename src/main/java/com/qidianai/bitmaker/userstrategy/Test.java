@@ -22,7 +22,7 @@ public class Test extends Strategy {
 
     @Override
     public void prepare(HashMap<String, String> args) {
-        if (args.containsKey("namespace")) {
+        if (args != null && args.containsKey("namespace")) {
             this.namespace = args.get("namespace");
         }
 

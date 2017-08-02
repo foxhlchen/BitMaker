@@ -65,7 +65,8 @@ public final class StrategyRunner implements Runnable{
                 strategyThread.setStrategyCfg(v);
                 strategyBook.add(strategyThread);
             } catch (Exception e) {
-                log.error("Load Userstrategy " + k + " failed. " + e.getMessage());
+                e.printStackTrace();
+                log.error("Load Userstrategy " + k + " failed. " + e);
             }
 
         });

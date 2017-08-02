@@ -40,11 +40,24 @@ public interface IStockRestApi {
 	*/
 	public String trades(String symbol, String since) throws HttpException, IOException;
 
+
+	/**
+	 * K线图
+	 * @param symbol
+	 * @param size
+	 * @param since
+	 * @return
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	public String kLine(String type, String symbol, String size, String since) throws HttpException, IOException;
+
+
 	/**
 	 * 获取用户信息
 	 * @return
-	 * @throws IOException 
-	 * @throws HttpException 
+	 * @throws IOException
+	 * @throws HttpException
 	*/
 	public String userinfo() throws HttpException, IOException;
 

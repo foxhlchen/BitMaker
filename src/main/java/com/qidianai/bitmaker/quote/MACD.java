@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayDeque;
+import java.util.Iterator;
 
 /**********************************************************
  * BitMaker
@@ -28,7 +29,7 @@ class HistQueue extends ArrayDeque<JsonKline> {
     /**
      * long period alpha =2/(N+1) N=20
      */
-    static final double alpha_long = 2.0 / 21;
+    static final double alpha_long = 2.0 / 27;
 
     /**
      * DEA alpha =2/(N+1) N=9
@@ -45,7 +46,7 @@ class HistQueue extends ArrayDeque<JsonKline> {
     /**
      * macd
      */
-    double macd;
+    double macd = Double.MIN_NORMAL;
 
     HistQueue() {
         super(QueueSize + 5);
@@ -92,7 +93,9 @@ class HistQueue extends ArrayDeque<JsonKline> {
         double macd = 0;
 
         synchronized (dataLock) {
-            for (JsonKline kline : this) {
+            Iterator<JsonKline> it = this.descendingIterator();
+            while (it.hasNext()) {
+                JsonKline kline = it.next();
                 double price = kline.closePrice;
 
                 //first element
@@ -103,8 +106,8 @@ class HistQueue extends ArrayDeque<JsonKline> {
                     continue;
                 }
 
-                emaS = emaS + alphaS * (price - emaS);
-                emaL = emaL + alphaL * (price - emaL);
+                emaS += (price - emaS) * alpha_short;
+                emaL += (price - emaL) * alpha_long;
 
                 diff = emaS - emaL;
                 dea = dea + alphaDea * (diff - dea);
@@ -112,15 +115,22 @@ class HistQueue extends ArrayDeque<JsonKline> {
             }
         }
 
-        System.out.println("===============");
-        System.out.println(diff);
-        System.out.println(dea);
-        System.out.println(macd);
+//        System.out.println("===============");
+//        System.out.println(this.getFirst().easyDate);
+//        System.out.println(this.size());
+//        System.out.println(emaS);
+//        System.out.println(emaL);
+//        System.out.println(diff);
+//        System.out.println(dea);
+//        System.out.println(macd);
 
         return macd;
     }
 
     void updateMACD() {
+        if (size() < QueueSize) {
+            return;
+        }
         macd = calcMACD(alpha_short, alpha_long, alpha_dea);
     }
 
@@ -168,10 +178,10 @@ public class MACD extends Quotation {
 
     @Override
     public void update() {
-        //histKline1m.updateMACD();
+        histKline1m.updateMACD();
+        histKline5m.updateMACD();
         histKline15m.updateMACD();
-        //histKline30m.updateMACD();
-        //histKline5m.updateMACD();
+        histKline30m.updateMACD();
     }
 
     @Override
