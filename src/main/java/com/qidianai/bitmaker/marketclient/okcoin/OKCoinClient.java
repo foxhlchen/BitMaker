@@ -80,11 +80,9 @@ public class OKCoinClient {
             e.printStackTrace();
         }
 
-        if (ret.charAt(0) == '{')
+        if (ret == null || ret.charAt(0) == '{')
             log.error("Get Kline " + type + " Failed. " + ret);
 
-        if (ret == null)
-            return;
 
         Type datatype = new TypeToken<ArrayList<ArrayList<String>>>() {
         }.getType();
@@ -121,8 +119,6 @@ public class OKCoinClient {
             }
             batch.add(jsonKline);
         }
-
-        System.out.println();
 
         EvKline evKline = new EvKline();
         evKline.setData(batch);
