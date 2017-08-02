@@ -7,6 +7,7 @@ import com.qidianai.bitmaker.marketclient.okcoin.JsonTicker;
 import com.qidianai.bitmaker.notification.SMTPNotify;
 import com.qidianai.bitmaker.portfolio.OKCoinAccount;
 import com.qidianai.bitmaker.quote.BollingerBand;
+import com.qidianai.bitmaker.quote.MACD;
 import com.qidianai.bitmaker.strategy.Strategy;
 
 import java.util.Calendar;
@@ -26,6 +27,7 @@ public final class BollStrategy extends Strategy {
     private MarketStatus marketStatus = MarketStatus.mkNormal;
     private OKCoinAccount account = new OKCoinAccount();
     private BollingerBand bollband = new BollingerBand();
+    private MACD macd = new MACD();
     private JsonTicker lastTick = new JsonTicker();
     private long lastUpdate = -1;
     private String namespace = className;
@@ -122,55 +124,11 @@ public final class BollStrategy extends Strategy {
         return false;
     }
 
-    @Override
-    public void prepare(HashMap<String, String> args) {
-        if (args != null && args.containsKey("namespace")) {
-            this.namespace = args.get("namespace");
-        }
+    private void doTrade() {
+        double sigShortTerm = bollband.getPercentB(lastTick.last, "15min");
+        double sigLongTerm = bollband.getPercentB(lastTick.last, "30min");
 
-        Reactor.getInstance(namespace).register(EvTicker.class, this);
-
-        bollband.setEventDomain(namespace, namespace);
-        account.setEventDomain(namespace, namespace);
-
-        bollband.prepare();
-        account.prepare();
-
-        account.subscribeMarketQuotation();
-    }
-
-    @Override
-    public void run() {
-        // reconnect
-        if (checkReconnectMarket()) {
-            return;
-        }
-
-        // update market data
-        bollband.update();
-        account.update();
-
-        // change trade day
-        dayChange(17, 00);
-
-        // risk manage
-        if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
-            riskSignal();
-        }
-
-        // risk protection, stop trading
-        if (riskProtect) {
-            return;
-        }
-
-        // trade signal
-        double percentB_1min = bollband.getPercentB(lastTick.last, "1min");
-        double percentB_5min = bollband.getPercentB(lastTick.last, "5min");
-        double percentB_15min = bollband.getPercentB(lastTick.last, "15min");
-        double percentB_30min = bollband.getPercentB(lastTick.last, "30min");
-
-        double sigLongTerm = percentB_30min;
-        double sigShortTerm = percentB_15min;
+        double macd15 = macd.getMACD("15min");
 
         switch (marketStatus) {
             case mkNormal: {
@@ -187,7 +145,7 @@ public final class BollStrategy extends Strategy {
                 break;
             }
             case mkHigher: {
-                if (sigShortTerm < 1) {
+                if (sigShortTerm < 1 && macd15 < 0) {
                     sellSignal();
 
                     log.info("price got into normal state.");
@@ -197,7 +155,7 @@ public final class BollStrategy extends Strategy {
                 break;
             }
             case mkLower: {
-                if (sigShortTerm > 0) {
+                if (sigShortTerm > 0 && macd15 > 0) {
                     buySignal();
 
                     log.info("price got into normal state.");
@@ -205,6 +163,54 @@ public final class BollStrategy extends Strategy {
                 }
             }
         }
+    }
+
+    @Override
+    public void prepare(HashMap<String, String> args) {
+        if (args != null && args.containsKey("namespace")) {
+            this.namespace = args.get("namespace");
+        }
+
+        Reactor.getInstance(namespace).register(EvTicker.class, this);
+
+        bollband.setEventDomain(namespace, namespace);
+        macd.setEventDomain(namespace, namespace);
+        account.setEventDomain(namespace, namespace);
+
+        bollband.prepare();
+        macd.prepare();
+        account.prepare();
+
+        account.subscribeMarketQuotation();
+    }
+
+    @Override
+    public void run() {
+        // reconnect
+        if (checkReconnectMarket()) {
+            return;
+        }
+
+        // update market data
+        bollband.update();
+        account.update();
+        macd.update();
+
+        // change trade day
+        dayChange(17, 00);
+
+        // risk manage
+        if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
+            riskSignal();
+        }
+
+        // risk protection, stop trading
+        if (riskProtect) {
+            return;
+        }
+
+        // trade signal
+        doTrade();
 
         // sleep until next round
         try {
