@@ -22,7 +22,7 @@ import java.util.HashMap;
  *
  **********************************************************/
 public final class BollStrategy extends Strategy {
-    private final double RISK_FACTOR = 0.9;
+    private final double RISK_FACTOR = 0.95;
 
     private MarketStatus marketStatus = MarketStatus.mkNormal;
     private OKCoinAccount account = new OKCoinAccount();
@@ -155,7 +155,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // sell signal
-                if (sigShortTerm < 1 && sigShortTerm > 0.5 && macd15 < -1.5) {
+                if (sigShortTerm < 1.1 && macd15 < -1.5) {
                     sellSignal();
 
                     log.info("price get into normal state.");
@@ -165,11 +165,11 @@ public final class BollStrategy extends Strategy {
 
 
                 // dismiss higher state
-                if (elapsed > 5400) {
-                    log.info("higher state dismiss.");
-                    marketStatus = MarketStatus.mkNormal;
-                    enterSec = nowSec;
-                }
+//                if (elapsed > 5400) {
+//                    log.info("higher state dismiss.");
+//                    marketStatus = MarketStatus.mkNormal;
+//                    enterSec = nowSec;
+//                }
 
                 break;
             }
@@ -179,7 +179,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // buy signal
-                if (sigShortTerm > 0 && sigShortTerm < 0.5 && macd15 > 1.5) {
+                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macd15 > 1.5) {
                     buySignal();
 
                     log.info("price get into normal state.");
@@ -188,7 +188,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // dismiss lower state
-                if (elapsed > 3600 || sigShortTerm > 0.65) {
+                if (elapsed > 6300 || sigShortTerm > 0.65) {
                     log.info("low state dismiss.");
                     marketStatus = MarketStatus.mkNormal;
                     enterSec = nowSec;
