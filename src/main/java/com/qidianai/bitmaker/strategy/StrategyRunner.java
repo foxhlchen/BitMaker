@@ -144,6 +144,7 @@ public final class StrategyRunner implements Runnable{
                             log.error("Restart Userstrategy " + k + " failed. " + e.getMessage());
                             SMTPNotify.send("Strategy " + v.strategyName + " Restart error",
                                     "Strategy " + v.strategyName + " restart error");
+                            e.printStackTrace();
                         }
                     }
 

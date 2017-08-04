@@ -80,11 +80,11 @@ public final class BollStrategy extends Strategy {
         SMTPNotify.send("AccountReport", reportContent);
     }
 
-    private void dayChange(int reportHour, int reportMin) {
+    private void dayChange(int occurHour, int occurMin) {
         int nowHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         int nowMin = Calendar.getInstance().get(Calendar.MINUTE);
 
-        if (nowHour == reportHour && nowMin == reportMin) {
+        if (nowHour == occurHour && nowMin == occurMin) {
             ////////change day
 
             // close risk protection
@@ -239,7 +239,7 @@ public final class BollStrategy extends Strategy {
         macd.update();
 
         // change trade day
-        dayChange(17, 00);
+        dayChange(17, 0);
 
         // risk manage
         if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
