@@ -24,17 +24,17 @@ class HistQueue extends ArrayDeque<JsonKline> {
     /**
      * short period alpha =2/(N+1) N=12
      */
-    static final double alpha_short = 2.0 / 13;
+    public static double alpha_short = 2.0 / 13;
 
     /**
      * long period alpha =2/(N+1) N=20
      */
-    static final double alpha_long = 2.0 / 27;
+    public static double alpha_long = 2.0 / 27;
 
     /**
      * DEA alpha =2/(N+1) N=9
      */
-    static final double alpha_dea = 2.0 / 10;
+    public static double alpha_dea = 2.0 / 10;
 
     /**
      * max Queue size
@@ -169,6 +169,28 @@ public class MACD extends Quotation {
         }
 
         return macd;
+    }
+
+    public void setAlpha(int pfast, int pslow, int pdea) {
+        double fast = 2.0 / (pfast + 1);
+        double slow = 2.0 / (pslow + 1);
+        double dea = 2.0 / (pdea + 1);
+
+        histKline1m.alpha_short = fast;
+        histKline5m.alpha_short = fast;
+        histKline15m.alpha_short = fast;
+        histKline30m.alpha_short = fast;
+
+        histKline1m.alpha_long = slow;
+        histKline5m.alpha_long = slow;
+        histKline15m.alpha_long = slow;
+        histKline30m.alpha_long = slow;
+
+        histKline1m.alpha_dea = dea;
+        histKline5m.alpha_dea = dea;
+        histKline15m.alpha_dea = dea;
+        histKline30m.alpha_dea = dea;
+
     }
 
     @Override
