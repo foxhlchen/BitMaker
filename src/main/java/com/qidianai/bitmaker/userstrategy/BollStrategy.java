@@ -22,7 +22,7 @@ import java.util.HashMap;
  *
  **********************************************************/
 public final class BollStrategy extends Strategy {
-    private final double RISK_FACTOR = 0.95;
+    private final double RISK_FACTOR = 0.98;
 
     private MarketStatus marketStatus = MarketStatus.mkNormal;
     private OKCoinAccount account = new OKCoinAccount();
@@ -68,7 +68,8 @@ public final class BollStrategy extends Strategy {
             account.sellMarketEth(avalableEth);
         }
 
-        riskProtect = true;
+        //prohibit riskProtection
+        //riskProtect = true;
     }
 
     public void sendAccountReport() {
@@ -129,7 +130,7 @@ public final class BollStrategy extends Strategy {
         long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
         long elapsed = nowSec - enterSec;
         double sigShortTerm = bollband.getPercentB(lastTick.last, "15min");
-        double sigLongTerm = bollband.getPercentB(lastTick.last, "30min");
+        double sigLongTerm = bollband.getPercentB(lastTick.last, "15min");
 
         double macd15 = macd.getMACD("15min");
 
@@ -212,7 +213,7 @@ public final class BollStrategy extends Strategy {
         macd.setEventDomain(namespace, namespace);
         account.setEventDomain(namespace, namespace);
 
-        macd.setAlpha(6, 12, 9);
+        macd.setAlpha(12, 20, 9);
 
         bollband.prepare();
         macd.prepare();
