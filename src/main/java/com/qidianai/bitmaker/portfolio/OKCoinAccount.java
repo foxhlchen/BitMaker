@@ -187,7 +187,7 @@ public class OKCoinAccount extends Account {
                 initialCny = availableCny;
             }
 
-            if (availableEth < 0.01) {
+            if (availableEth < 0.01 && activeOrderMap.size() == 0) {
                 initialCny = availableCny;
             }
         }
