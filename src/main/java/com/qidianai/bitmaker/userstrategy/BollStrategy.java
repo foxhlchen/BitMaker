@@ -220,7 +220,7 @@ public final class BollStrategy extends Strategy {
         macd.setEventDomain(namespace, namespace);
         account.setEventDomain(namespace, namespace);
 
-        macd.setAlpha(12, 20, 9);
+        macd.setAlpha(6, 10, 3);
 
         bollband.prepare();
         macd.prepare();
