@@ -28,6 +28,7 @@ public final class BollStrategy extends Strategy {
     private OKCoinAccount account = new OKCoinAccount();
     private BollingerBand bollband = new BollingerBand();
     private MACD macd = new MACD();
+    private MACD macdFast = new MACD();
     private JsonTicker lastTick = new JsonTicker();
     private long lastUpdate = -1;
     private String namespace = className;
@@ -132,7 +133,7 @@ public final class BollStrategy extends Strategy {
         double sigShortTerm = bollband.getPercentB(lastTick.last, "1min");
         double sigLongTerm = bollband.getPercentB(lastTick.last, "1min");
 
-        double macd15 = macd.getMACD("1min");
+        double macdFast = this.macdFast.getMACD("1min");
 
         switch (marketStatus) {
             case mkNormal: {
@@ -156,7 +157,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // sell signal
-                if (sigShortTerm < 1.1 && macd15 < -0.7) {
+                if (sigShortTerm < 1.1 && macdFast < -0.7) {
                     sellSignal();
 
                     log.info("price get into normal state.");
@@ -165,7 +166,7 @@ public final class BollStrategy extends Strategy {
                 }
 
 
-                if (sigShortTerm < 0.6 && macd15 < -0.5) {
+                if (sigShortTerm < 0.6 && macdFast < -0.5) {
                     sellSignal();
 
                     log.info("price get into normal state.");
@@ -187,7 +188,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // buy signal
-                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macd15 > 0.7) {
+                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macdFast > 0.7) {
                     buySignal();
 
                     log.info("price get into normal state.");
@@ -218,9 +219,11 @@ public final class BollStrategy extends Strategy {
 
         bollband.setEventDomain(namespace, namespace);
         macd.setEventDomain(namespace, namespace);
+        macdFast.setEventDomain(namespace, namespace);
         account.setEventDomain(namespace, namespace);
 
-        macd.setAlpha(6, 10, 3);
+        macd.setAlpha(12, 20, 9);
+        macdFast.setAlpha(6, 9, 3);
 
         bollband.prepare();
         macd.prepare();
@@ -247,6 +250,7 @@ public final class BollStrategy extends Strategy {
         bollband.update();
         account.update();
         macd.update();
+        macdFast.update();
 
         // change trade day
         dayChange(17, 0);
