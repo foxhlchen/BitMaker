@@ -22,7 +22,7 @@ import java.util.HashMap;
  *
  **********************************************************/
 public final class BollStrategy extends Strategy {
-    private final double RISK_FACTOR = 0.98;
+    private final double RISK_FACTOR = 0.99;
 
     private MarketStatus marketStatus = MarketStatus.mkNormal;
     private OKCoinAccount account = new OKCoinAccount();
