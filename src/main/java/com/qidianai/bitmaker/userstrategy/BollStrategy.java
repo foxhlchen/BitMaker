@@ -142,7 +142,7 @@ public final class BollStrategy extends Strategy {
                     enterSec = nowSec;
                 }
 
-                if (sigShortTerm > 1 && sigLongTerm > 1) {
+                if (sigShortTerm > 0.6 && sigLongTerm > 0.6) {
                     log.info("price get into high state.");
                     marketStatus = MarketStatus.mkHigher;
                     enterSec = nowSec;
@@ -165,7 +165,7 @@ public final class BollStrategy extends Strategy {
                 }
 
 
-                if (sigShortTerm < 0.85) {
+                if (sigShortTerm < 0.6 && macd15 < -0.5) {
                     sellSignal();
 
                     log.info("price get into normal state.");
