@@ -156,7 +156,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // sell signal
-                if (sigShortTerm < 1.1 && macd15 < -1.5) {
+                if (sigShortTerm < 1.1 && macd15 < -0.7) {
                     sellSignal();
 
                     log.info("price get into normal state.");
@@ -187,7 +187,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // buy signal
-                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macd15 > 1.5) {
+                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macd15 > 0.7) {
                     buySignal();
 
                     log.info("price get into normal state.");
@@ -196,7 +196,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // dismiss lower state
-                if (elapsed > 6300 || sigShortTerm > 0.65) {
+                if (elapsed > 1200 || sigShortTerm > 0.65) {
                     log.info("low state dismiss.");
                     marketStatus = MarketStatus.mkNormal;
                     enterSec = nowSec;
