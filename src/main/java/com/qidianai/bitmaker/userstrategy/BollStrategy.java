@@ -129,10 +129,10 @@ public final class BollStrategy extends Strategy {
     private void doTrade() {
         long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
         long elapsed = nowSec - enterSec;
-        double sigShortTerm = bollband.getPercentB(lastTick.last, "15min");
-        double sigLongTerm = bollband.getPercentB(lastTick.last, "15min");
+        double sigShortTerm = bollband.getPercentB(lastTick.last, "1min");
+        double sigLongTerm = bollband.getPercentB(lastTick.last, "1min");
 
-        double macd15 = macd.getMACD("15min");
+        double macd15 = macd.getMACD("1min");
 
         switch (marketStatus) {
             case mkNormal: {
@@ -165,6 +165,13 @@ public final class BollStrategy extends Strategy {
                 }
 
 
+                if (sigShortTerm < 0.85) {
+                    sellSignal();
+
+                    log.info("price get into normal state.");
+                    marketStatus = MarketStatus.mkNormal;
+                    enterSec = nowSec;
+                }
                 // dismiss higher state
 //                if (elapsed > 5400) {
 //                    log.info("higher state dismiss.");
