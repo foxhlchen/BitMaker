@@ -40,18 +40,27 @@ public final class BollStrategy extends Strategy {
     private void buySignal() {
         log.info("Buy signal is triggered.");
 
+        double price = lastTick.last;
         double availableCny = account.getAvailableCny();
-        if (availableCny > lastTick.last * 0.01) {  // Minimum trade volume
-            account.buyMarketEth(availableCny);
+        if (availableCny > price * 0.01) {  // Minimum trade volume
+            //account.buyMarketEth(availableCny);
+
+            double amount = availableCny / price;
+            amount = Math.floor(amount * 100) / 100;
+            account.buyEth(price, amount);
         }
     }
 
     private void sellSignal() {
         log.info("Sell signal is triggered.");
 
+        double price = lastTick.last;
         double availableEth = account.getAvailableEth();
         if (availableEth >= 0.01) {
-            account.sellMarketEth(availableEth);
+            //account.sellMarketEth(availableEth);
+
+            double amount = Math.floor(availableEth * 100) / 100;
+            account.sellEth(price, amount);
         }
     }
 
@@ -129,6 +138,15 @@ public final class BollStrategy extends Strategy {
         }
 
         return false;
+    }
+
+    private void cancelAllOrders() {
+        if (account.getActiveOrderMap().size() > 0) {
+            account.getActiveOrderMap().forEach((orderId, order) -> {
+                log.info("cancel order " + orderId);
+                account.cancelEth(orderId);
+            });
+        }
     }
 
     private void doTrade() {
@@ -270,7 +288,7 @@ public final class BollStrategy extends Strategy {
         dayChange(17, 0);
 
         // risk manage
-        if (account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
+        if (account.getAvailableEth() > 0.01 && account.getTotalAssetValueCny(lastTick.last) < account.getInitialCny() * RISK_FACTOR) {
             riskSignal();
         }
 
@@ -278,6 +296,9 @@ public final class BollStrategy extends Strategy {
         if (riskProtect) {
             return;
         }
+
+        // cancel timeout orders
+        cancelAllOrders();
 
         // trade signal
         doTrade();
