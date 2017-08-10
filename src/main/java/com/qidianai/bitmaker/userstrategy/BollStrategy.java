@@ -82,8 +82,8 @@ public final class BollStrategy extends Strategy {
             account.sellMarketEth(avalableEth);
         }
 
-        //prohibit riskProtection
-        //riskProtect = true;
+
+        riskProtect = true;
     }
 
     public void sendAccountReport() {
@@ -141,12 +141,10 @@ public final class BollStrategy extends Strategy {
     }
 
     private void cancelAllOrders() {
-        if (account.getActiveOrderMap().size() > 0) {
-            account.getActiveOrderMap().forEach((orderId, order) -> {
-                log.info("cancel order " + orderId);
-                account.cancelEth(orderId);
-            });
-        }
+        account.getActiveOrderMap().forEach((orderId, order) -> {
+            log.info("cancel order " + orderId);
+            account.cancelEth(orderId);
+        });
     }
 
     private void doTrade() {
