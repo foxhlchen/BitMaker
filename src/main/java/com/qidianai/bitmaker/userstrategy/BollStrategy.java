@@ -22,7 +22,7 @@ import java.util.HashMap;
  *
  **********************************************************/
 public final class BollStrategy extends Strategy {
-    private final double RISK_FACTOR = 0.99;
+    private final double RISK_FACTOR = 0.96;
 
     private MarketStatus marketStatus = MarketStatus.mkNormal;
     private OKCoinAccount account = new OKCoinAccount();
@@ -65,7 +65,8 @@ public final class BollStrategy extends Strategy {
 
         double avalableEth = account.getAvailableEth();
         // sell all ether, close all positions
-        if (account.getAvailableEth() >= 0.001) {
+        if (avalableEth >= 0.01) {
+            log.warn(String.format("Risk sell %f", avalableEth));
             account.sellMarketEth(avalableEth);
         }
 
@@ -157,7 +158,7 @@ public final class BollStrategy extends Strategy {
                     enterSec = nowSec;
                 }
 
-                if (sigShortTerm > 0.6) {
+                if (sigShortTerm > 1) {
                     log.info("price get into high state.");
                     marketStatus = MarketStatus.mkHigher;
                     enterSec = nowSec;
@@ -167,7 +168,7 @@ public final class BollStrategy extends Strategy {
             }
             case mkHigher: {
                 // sell signal
-                if (sigShortTerm < 1 && macdFast < -0.7) {
+                if (sigShortTerm < 1.1 && macdFast < -0.7) {
                     sellSignal();
 
                     log.info("price get into normal state.");
