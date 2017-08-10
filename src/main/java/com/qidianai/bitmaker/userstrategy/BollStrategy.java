@@ -64,7 +64,9 @@ public final class BollStrategy extends Strategy {
         account.getActiveOrderMap().forEach((orderId, order) -> account.cancelEth(orderId));
 
         double avalableEth = account.getAvailableEth();
-        log.warn(String.format("now available eth %f", avalableEth));
+        log.warn(String.format("Initial assets value %f", account.getInitialCny()));
+        log.warn(String.format("now available eth %f, cny %f, total assets value %f", avalableEth,
+                account.getAvailableCny(), account.getTotalAssetValueCny(lastTick.last)));
         // sell all ether, close all positions
         if (avalableEth >= 0.01) {
             log.warn(String.format("Risk sell %f", avalableEth));
