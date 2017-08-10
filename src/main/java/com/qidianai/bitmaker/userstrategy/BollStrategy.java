@@ -56,7 +56,7 @@ public final class BollStrategy extends Strategy {
     }
 
     private void riskSignal() {
-        log.warn("Risk signal is triggered.");
+        log.warn("Risk signal is triggered. price:" + lastTick.last);
 
         SMTPNotify.send("Risk signal", "Risk signal has been triggered at price " + lastTick.last);
 
@@ -64,6 +64,7 @@ public final class BollStrategy extends Strategy {
         account.getActiveOrderMap().forEach((orderId, order) -> account.cancelEth(orderId));
 
         double avalableEth = account.getAvailableEth();
+        log.warn(String.format("now available eth %f", avalableEth));
         // sell all ether, close all positions
         if (avalableEth >= 0.01) {
             log.warn(String.format("Risk sell %f", avalableEth));
@@ -199,7 +200,7 @@ public final class BollStrategy extends Strategy {
                 }
 
                 // buy signal
-                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macdFast + macd > 0.5) {
+                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macdFast + macd > 0) {
                     buySignal();
 
                     log.info("price get into normal state.");
@@ -233,7 +234,7 @@ public final class BollStrategy extends Strategy {
         macdFast.setEventDomain(namespace, namespace);
         account.setEventDomain(namespace, namespace);
 
-        macd.setAlpha(12, 20, 9);
+        macd.setAlpha(12, 20, 2);
         macdFast.setAlpha(6, 9, 3);
 
         bollband.prepare();
