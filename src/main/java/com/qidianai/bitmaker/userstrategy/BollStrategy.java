@@ -150,11 +150,11 @@ public final class BollStrategy extends Strategy {
     private void doTrade() {
         long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
         long elapsed = nowSec - enterSec;
-        double sigShortTerm = bollband.getPercentB(lastTick.last, "1min");
-        double sigLongTerm = bollband.getPercentB(lastTick.last, "1min");
+        double sigShortTerm = bollband.getPercentB(lastTick.last, "15min");
+        double sigLongTerm = bollband.getPercentB(lastTick.last, "15min");
 
-        double macd = this.macd.getMACD("1min");
-        double macdFast = this.macdFast.getMACD("1min");
+        double macd = this.macd.getMACD("15min");
+        double macdFast = this.macdFast.getMACD("15min");
 
         if (sigShortTerm > 1.5) {
             log.info("> 1.5 percentB Sell");
