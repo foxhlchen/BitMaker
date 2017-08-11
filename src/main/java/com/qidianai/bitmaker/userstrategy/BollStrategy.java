@@ -57,10 +57,10 @@ public final class BollStrategy extends Strategy {
         double price = lastTick.last;
         double availableEth = account.getAvailableEth();
         if (availableEth >= 0.01) {
-            //account.sellMarketEth(availableEth);
+            account.sellMarketEth(availableEth);
 
-            double amount = Math.floor(availableEth * 100) / 100;
-            account.sellEth(price, amount);
+            //double amount = Math.floor(availableEth * 100) / 100;
+            //account.sellEth(price, amount);
         }
     }
 
@@ -187,7 +187,7 @@ public final class BollStrategy extends Strategy {
             }
             case mkHigher: {
                 // sell signal
-                if (sigShortTerm < 1.1 && macdFast < -0.7) {
+                if (sigShortTerm < 1.1 && macdFast < -0.05) {
                     sellSignal();
 
                     log.info("price get into normal state.");
