@@ -7,6 +7,7 @@ import com.qidianai.bitmaker.marketclient.okcoin.JsonTicker;
 import com.qidianai.bitmaker.notification.SMTPNotify;
 import com.qidianai.bitmaker.portfolio.OKCoinAccount;
 import com.qidianai.bitmaker.quote.BollingerBand;
+import com.qidianai.bitmaker.quote.MA;
 import com.qidianai.bitmaker.quote.MACD;
 import com.qidianai.bitmaker.strategy.Strategy;
 
@@ -29,6 +30,7 @@ public final class BollStrategy extends Strategy {
     private BollingerBand bollband = new BollingerBand();
     private MACD macd = new MACD();
     private MACD macdFast = new MACD();
+    private MA ma = new MA();
     private JsonTicker lastTick = new JsonTicker();
     private long lastUpdate = -1;
     private String namespace = className;
@@ -40,14 +42,14 @@ public final class BollStrategy extends Strategy {
     private void buySignal() {
         log.info("Buy signal is triggered.");
 
-        double price = lastTick.last;
+        double price = lastTick.sell;
         double availableCny = account.getAvailableCny();
         if (availableCny > price * 0.01) {  // Minimum trade volume
-            //account.buyMarketEth(availableCny);
+            account.buyMarketEth(availableCny);
 
-            double amount = availableCny / price;
-            amount = Math.floor(amount * 100) / 100;
-            account.buyEth(price, amount);
+            //double amount = availableCny / price;
+            //amount = Math.floor(amount * 100) / 100;
+            //account.buyEth(price, amount);
         }
     }
 
@@ -250,6 +252,7 @@ public final class BollStrategy extends Strategy {
         bollband.setEventDomain(namespace, namespace);
         macd.setEventDomain(namespace, namespace);
         macdFast.setEventDomain(namespace, namespace);
+        ma.setEventDomain(namespace, namespace);
         account.setEventDomain(namespace, namespace);
 
         macd.setAlpha(12, 20, 2);
@@ -257,6 +260,7 @@ public final class BollStrategy extends Strategy {
 
         bollband.prepare();
         macd.prepare();
+        ma.prepare();
         account.prepare();
 
         account.subscribeMarketQuotation();
@@ -281,6 +285,7 @@ public final class BollStrategy extends Strategy {
         account.update();
         macd.update();
         macdFast.update();
+        ma.update();
 
         // change trade day
         dayChange(17, 0);
