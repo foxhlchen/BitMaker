@@ -230,8 +230,8 @@ public class OKCoinAccount extends Account {
 
             // Order Finished
             if (order.status == Order.OrderStatus.OrderDone) {
-                SMTPNotify.send(String.format("NewOrder %.2f %.2f %s %s", order.tradedPrice, order.tradedAmt, order.directType, order.orderId), order.toString()); //"New Order (" + order.tradedPrice + ") " + order.orderId, order.toString());
                 activeOrderMap.remove(order.orderId);
+                SMTPNotify.send(String.format("NewOrder %.2f %.2f %s %s", order.tradedPrice, order.tradedAmt, order.directType, order.orderId), order.toString());
             }
         } else if (ev.getType() == EvResult.class) {
             EvResult evt = (EvResult) ev;
