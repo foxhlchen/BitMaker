@@ -1,8 +1,11 @@
 package com.qidianai.bitmaker.userstrategy;
 
+import com.qidianai.bitmaker.event.EvKline;
 import com.qidianai.bitmaker.event.EvTicker;
 import com.qidianai.bitmaker.eventsys.Event;
 import com.qidianai.bitmaker.eventsys.Reactor;
+import com.qidianai.bitmaker.marketclient.okcoin.JsonKline;
+import com.qidianai.bitmaker.marketclient.okcoin.JsonKlineBatch;
 import com.qidianai.bitmaker.marketclient.okcoin.JsonTicker;
 import com.qidianai.bitmaker.notification.SMTPNotify;
 import com.qidianai.bitmaker.portfolio.OKCoinAccount;
@@ -32,6 +35,10 @@ public final class BollStrategy extends Strategy {
     private MACD macdFast = new MACD();
     private MA ma = new MA();
     private JsonTicker lastTick = new JsonTicker();
+    private JsonKline lastKline1m = new JsonKline();
+    private JsonKline lastKline5m = new JsonKline();
+    private JsonKline lastKline15m = new JsonKline();
+    private JsonKline lastKline30m = new JsonKline();
     private long lastUpdate = -1;
     private String namespace = className;
     private boolean riskProtect = false;
@@ -162,11 +169,11 @@ public final class BollStrategy extends Strategy {
         double percentMa = ma5 / ma10;
 
         boolean bBandSize = bbandWidth > 0.02;
-        boolean bBandPosition = lastTick.close > bbandMiddle && lastTick.open > bbandMiddle;
+        boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
         boolean bMA = percentMa > 1;
 
         if (bBandSize && bBandPosition && bMA) {
-            buySignal();
+            //buySignal();
         }
 
         boolean sMA = percentMa < 0.998;
@@ -183,6 +190,7 @@ public final class BollStrategy extends Strategy {
         }
 
         Reactor.getInstance(namespace).register(EvTicker.class, this);
+        Reactor.getInstance(namespace).register(EvKline.class, this);
 
         bollband.setEventDomain(namespace, namespace);
         macd.setEventDomain(namespace, namespace);
@@ -257,6 +265,28 @@ public final class BollStrategy extends Strategy {
             lastTick = ticker;
 
             lastUpdate = Calendar.getInstance().getTimeInMillis() / 1000;
+        } else if (ev.getType() == EvKline.class) {
+            EvKline evKline = (EvKline) ev;
+            JsonKlineBatch batch = evKline.getData();
+            batch.getKlinelist().forEach(jsonKline -> {
+                switch (jsonKline.klinePeriod) {
+                    case kLine1Min:
+                        lastKline1m = jsonKline;
+                        break;
+
+                    case kLine15Min:
+                        lastKline15m = jsonKline;
+                        break;
+
+                    case kLine30Min:
+                        lastKline30m = jsonKline;
+                        break;
+                    case kLine5Min:
+                        lastKline5m = jsonKline;
+                        break;
+                }
+
+            });
         }
     }
 
