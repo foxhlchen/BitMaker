@@ -173,7 +173,7 @@ public final class BollStrategy extends Strategy {
         boolean bMA = percentMa > 1;
 
         if (bBandSize && bBandPosition && bMA) {
-            //buySignal();
+            buySignal();
         }
 
         boolean sMA = percentMa < 0.998;
