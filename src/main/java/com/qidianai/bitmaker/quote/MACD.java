@@ -24,17 +24,17 @@ class HistQueue extends ArrayDeque<JsonKline> {
     /**
      * short period alpha =2/(N+1) N=12
      */
-    public static double alpha_short = 2.0 / 13;
+    public double alpha_short = 2.0 / 13;
 
     /**
      * long period alpha =2/(N+1) N=20
      */
-    public static double alpha_long = 2.0 / 27;
+    public double alpha_long = 2.0 / 27;
 
     /**
      * DEA alpha =2/(N+1) N=9
      */
-    public static double alpha_dea = 2.0 / 10;
+    public double alpha_dea = 2.0 / 10;
 
     /**
      * max Queue size
