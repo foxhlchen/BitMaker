@@ -40,11 +40,10 @@ public final class BollStrategy extends Strategy {
     private boolean isReported = false;
 
     private void buySignal() {
-        log.info("Buy signal is triggered.");
-
         double price = lastTick.sell;
         double availableCny = account.getAvailableCny();
         if (availableCny > price * 0.01) {  // Minimum trade volume
+            log.info("Buy signal is triggered.");
             account.buyMarketEth(availableCny);
 
             //double amount = availableCny / price;
@@ -54,11 +53,10 @@ public final class BollStrategy extends Strategy {
     }
 
     private void sellSignal() {
-        log.info("Sell signal is triggered.");
-
         double price = lastTick.last;
         double availableEth = account.getAvailableEth();
         if (availableEth >= 0.01) {
+            log.info("Sell signal is triggered.");
             account.sellMarketEth(availableEth);
 
             //double amount = Math.floor(availableEth * 100) / 100;
@@ -152,92 +150,29 @@ public final class BollStrategy extends Strategy {
     private void doTrade() {
         long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
         long elapsed = nowSec - enterSec;
-        double sigShortTerm = bollband.getPercentB(lastTick.last, "15min");
-        double sigLongTerm = bollband.getPercentB(lastTick.last, "15min");
+        double bband = bollband.getPercentB(lastTick.last, "15min");
+        double bbandMiddle = bollband.getMiddleBand("15min");
+        double bbandWidth = bollband.getBandWidth("15min");
 
         double macd = this.macd.getMACD("15min");
         double macdFast = this.macdFast.getMACD("15min");
 
-        if (sigShortTerm > 1.5) {
-            log.info("> 1.5 percentB Sell");
-            sellSignal();
-            marketStatus = MarketStatus.mkNormal;
-            log.info("price get into normal state.");
-        }
+        double ma5 = this.ma.getMA("15min", 5);
+        double ma10 = this.ma.getMA("15min", 10);
+        double percentMa = ma5 / ma10;
 
-        if (sigShortTerm < -0.5) {
-            log.info("< -0.5 percentB Buy");
+        boolean bBandSize = bbandWidth > 0.02;
+        boolean bBandPosition = lastTick.close > bbandMiddle && lastTick.open > bbandMiddle;
+        boolean bMA = percentMa > 1;
+
+        if (bBandSize && bBandPosition && bMA) {
             buySignal();
-            marketStatus = MarketStatus.mkNormal;
-            log.info("price get into normal state.");
         }
-        switch (marketStatus) {
-            case mkNormal: {
-                if (sigLongTerm < -0.3) {
-                    log.info("price get into low state.");
-                    marketStatus = MarketStatus.mkLower;
-                    enterSec = nowSec;
-                }
 
-                if (sigShortTerm > 1) {
-                    log.info("price get into high state.");
-                    marketStatus = MarketStatus.mkHigher;
-                    enterSec = nowSec;
-                }
+        boolean sMA = percentMa < 0.998;
 
-                break;
-            }
-            case mkHigher: {
-                // sell signal
-                if (sigShortTerm < 1.1 && macdFast < -0.05) {
-                    sellSignal();
-
-                    log.info("price get into normal state.");
-                    marketStatus = MarketStatus.mkNormal;
-                    enterSec = nowSec;
-                }
-
-
-                if (sigShortTerm < 0.45) {
-                    sellSignal();
-
-                    log.info("price get into normal state.");
-                    marketStatus = MarketStatus.mkNormal;
-                    enterSec = nowSec;
-                }
-                // dismiss higher state
-//                if (elapsed > 5400) {
-//                    log.info("higher state dismiss.");
-//                    marketStatus = MarketStatus.mkNormal;
-//                    enterSec = nowSec;
-//                }
-
-                break;
-            }
-            case mkLower: {
-                if (sigShortTerm < 1) {
-                    enterSec = nowSec;
-                }
-
-                // buy signal
-                if (sigShortTerm > -0.1 && sigShortTerm < 0.5 && macdFast + macd > 0) {
-                    buySignal();
-
-                    log.info("price get into normal state.");
-                    marketStatus = MarketStatus.mkNormal;
-                    enterSec = nowSec;
-                }
-
-                // dismiss lower state
-                if (elapsed > 1200 || sigShortTerm > 0.45) {
-                    log.info("low state dismiss.");
-                    marketStatus = MarketStatus.mkNormal;
-                    enterSec = nowSec;
-                }
-
-
-                break;
-            }
+        if (sMA) {
+            sellSignal();
         }
     }
 
@@ -255,7 +190,7 @@ public final class BollStrategy extends Strategy {
         ma.setEventDomain(namespace, namespace);
         account.setEventDomain(namespace, namespace);
 
-        macd.setAlpha(12, 20, 2);
+        macd.setAlpha(12, 26, 9);
         macdFast.setAlpha(6, 9, 3);
 
         bollband.prepare();
