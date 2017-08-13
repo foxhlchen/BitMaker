@@ -28,7 +28,7 @@ import java.util.HashMap;
 public final class BollStrategy extends Strategy {
     private final double RISK_FACTOR = 0.96;
 
-    private MarketStatus marketStatus = MarketStatus.mkNormal;
+    private MarketStatus marketStatus = MarketStatus.mkHigher;
     private OKCoinAccount account = new OKCoinAccount();
     private BollingerBand bollband = new BollingerBand();
     private MACD macd = new MACD();
@@ -171,15 +171,27 @@ public final class BollStrategy extends Strategy {
         boolean bBandSize = bbandWidth > 0.02;
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
         boolean bMA = percentMa > 1;
-
-        if (bBandSize && bBandPosition && bMA) {
-            buySignal();
-        }
-
         boolean sMA = percentMa < 0.998;
 
-        if (sMA) {
-            sellSignal();
+        switch (marketStatus) {
+            case mkLower: {
+                if (bBandSize && bBandPosition && bMA) {
+                    buySignal();
+
+                    marketStatus = MarketStatus.mkHigher;
+                    log.info("entering high status");
+                }
+                break;
+            }
+            case mkHigher: {
+                if (sMA) {
+                    sellSignal();
+
+                    marketStatus = MarketStatus.mkLower;
+                    log.info("entering low status");
+                }
+                break;
+            }
         }
     }
 
