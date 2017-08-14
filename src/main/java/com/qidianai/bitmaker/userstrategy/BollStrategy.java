@@ -43,6 +43,7 @@ public final class BollStrategy extends Strategy {
     private String namespace = className;
     private boolean riskProtect = false;
     private long enterSec = 0;
+    private double highest = 0;
 
     private boolean isReported = false;
 
@@ -172,9 +173,12 @@ public final class BollStrategy extends Strategy {
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
         boolean bMA = percentMa > 1;
         boolean sMA = percentMa < 0.998;
+        boolean sHigh = (lastTick.last - highest) / highest < 0.01;
 
         switch (marketStatus) {
             case mkLower: {
+                highest = 0;
+
                 if (bBandSize && bBandPosition && bMA) {
                     buySignal();
 
@@ -184,11 +188,21 @@ public final class BollStrategy extends Strategy {
                 break;
             }
             case mkHigher: {
+                if (lastTick.last > highest)
+                    highest = lastTick.last;
+
+                if (sHigh) {
+                    sellSignal();
+                    highest = 0;
+                    marketStatus = MarketStatus.mkLower;
+                    log.info("[sHigh] entering low status");
+                }
+
                 if (sMA) {
                     sellSignal();
-
+                    highest = 0;
                     marketStatus = MarketStatus.mkLower;
-                    log.info("entering low status");
+                    log.info("[sMA] entering low status");
                 }
                 break;
             }
