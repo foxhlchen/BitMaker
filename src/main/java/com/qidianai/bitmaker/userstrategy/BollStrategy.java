@@ -173,7 +173,7 @@ public final class BollStrategy extends Strategy {
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
         boolean bMA = percentMa > 1;
         boolean sMA = percentMa < 0.998;
-        boolean sHigh = (lastTick.last - highest) / (highest + 0.01) < 0.011;
+        boolean sHigh = (lastTick.last - highest) / (highest + 0.01) < -0.011;
 
         switch (marketStatus) {
             case mkLower: {
