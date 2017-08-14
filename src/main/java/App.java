@@ -50,7 +50,7 @@ public class App {
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("usage: Java App <config file>");
-            System.out.println("BitMaker v0.07 081202");
+            System.out.println("BitMaker v0.07 081402");
             System.exit(-1);
         }
 
