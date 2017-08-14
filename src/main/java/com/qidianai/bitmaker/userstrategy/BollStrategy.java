@@ -194,8 +194,6 @@ public final class BollStrategy extends Strategy {
                 if (sHigh) {
                     sellSignal();
                     highest = 0;
-                    marketStatus = MarketStatus.mkLower;
-                    log.info("[sHigh] entering low status");
                 }
 
                 if (sMA) {
