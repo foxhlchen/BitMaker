@@ -69,6 +69,8 @@ public class OKCoinClient {
         client.reConnect();
     }
 
+    public void disconnected() { client.stop(); }
+
     // ------------ Quotation --------------
 
     public void getKlineEth(String type, String size, String since) {

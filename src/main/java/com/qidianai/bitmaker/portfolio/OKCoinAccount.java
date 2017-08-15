@@ -138,6 +138,7 @@ public class OKCoinAccount extends Account {
         }
         if (okCoinClient != null) {
             // stop client
+            okCoinClient.disconnected();
         }
         okCoinClient = new OKCoinClient(apiKey, secretKey, url);
         okCoinClient.setEventDomain(tag, namespace);

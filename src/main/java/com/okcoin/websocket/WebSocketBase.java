@@ -70,6 +70,15 @@ public abstract class WebSocketBase {
 		timerTask.schedule(moniter, 1000, 5000);
 	}
 
+	public void stop() {
+		if (timerTask != null)
+			timerTask.cancel();
+
+		if (group != null)
+			group.shutdownGracefully();
+
+	}
+
 	public void setStatus(boolean flag) {
 		this.isAlive = flag;
 	}
