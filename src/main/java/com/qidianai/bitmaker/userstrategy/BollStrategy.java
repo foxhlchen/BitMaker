@@ -239,6 +239,8 @@ public final class BollStrategy extends Strategy {
                         sellFactor = 0.997;
                     } else if (enterPrice >= highest * 0.993) {
                         sellFactor = 0.993;
+                    } else {
+                        sellFactor = 0.99;
                     }
                 }
 
