@@ -230,7 +230,7 @@ public final class BollStrategy extends Strategy {
                 break;
             }
             case mkHigher: {
-                double sellFactor = 0;
+                double sellFactor = 0.99;
 
                 if (lastKline15m.closePrice > highest) {
                     highest = lastKline15m.closePrice;
@@ -239,8 +239,6 @@ public final class BollStrategy extends Strategy {
                         sellFactor = 0.997;
                     } else if (enterPrice >= highest * 0.993) {
                         sellFactor = 0.993;
-                    } else {
-                        sellFactor = 0.99;
                     }
                 }
 
