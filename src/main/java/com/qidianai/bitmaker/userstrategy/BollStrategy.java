@@ -42,14 +42,26 @@ public final class BollStrategy extends Strategy {
     private long lastUpdate = -1;
     private String namespace = className;
     private boolean riskProtect = false;
-    private long enterSec = 0;
+    private double enterPrice = 0;
     private double highest = 0;
 
     private boolean isReported = false;
 
     private void buySignal() {
+        // cancel all pending orders
+        if (account.getActiveOrderMap().size() > 0) {
+            account.getActiveOrderMap().forEach((orderId, order) -> account.cancelEth(orderId));
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         double price = lastTick.sell;
         double availableCny = account.getAvailableCny();
+
+
         if (availableCny > price * 0.01) {  // Minimum trade volume
             log.info("Buy signal is triggered.");
             account.buyMarketEth(availableCny);
@@ -61,8 +73,19 @@ public final class BollStrategy extends Strategy {
     }
 
     private void sellSignal() {
+        // cancel all pending orders
+        if (account.getActiveOrderMap().size() > 0) {
+            account.getActiveOrderMap().forEach((orderId, order) -> account.cancelEth(orderId));
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         double price = lastTick.last;
         double availableEth = account.getAvailableEth();
+
         if (availableEth >= 0.01) {
             log.info("Sell signal is triggered.");
             account.sellMarketEth(availableEth);
@@ -92,6 +115,26 @@ public final class BollStrategy extends Strategy {
 
 
         riskProtect = true;
+    }
+
+    private void setLimitSell(double limitprice) {
+        // cancel all pending orders
+        if (account.getActiveOrderMap().size() > 0) {
+            account.getActiveOrderMap().forEach((orderId, order) -> account.cancelEth(orderId));
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        double availableEth = account.getAvailableEth();
+        if (availableEth >= 0.01) {
+            log.info("Set limit sell at price " + limitprice);
+
+            double amount = Math.floor(availableEth * 100) / 100;
+            account.sellEth(limitprice, amount);
+        }
     }
 
     public void sendAccountReport() {
@@ -157,7 +200,6 @@ public final class BollStrategy extends Strategy {
 
     private void doTrade() {
         long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
-        long elapsed = nowSec - enterSec;
         double bband = bollband.getPercentB(lastTick.last, "15min");
         double bbandMiddle = bollband.getMiddleBand("15min");
         double bbandWidth = bollband.getBandWidth("15min");
@@ -173,7 +215,7 @@ public final class BollStrategy extends Strategy {
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
         boolean bMA = percentMa > 1;
         boolean sMA = percentMa < 0.999;
-        boolean sHigh = (lastTick.last - highest) / (highest + 0.01) < -0.01;
+        boolean sHigh = lastTick.last <= highest * 0.99;
 
         switch (marketStatus) {
             case mkLower: {
@@ -184,12 +226,22 @@ public final class BollStrategy extends Strategy {
 
                     marketStatus = MarketStatus.mkHigher;
                     log.info("entering high status");
+                    enterPrice = lastTick.last;
                 }
                 break;
             }
             case mkHigher: {
-                if (lastKline15m.closePrice > highest)
+                if (lastKline15m.closePrice > highest) {
                     highest = lastKline15m.closePrice;
+
+                    if (enterPrice >= highest * 0.993) {
+                        setLimitSell(highest * 0.993);
+                    } else if (enterPrice >= highest * 0.997) {
+                        setLimitSell(highest * 0.997);
+                    } else {
+                        setLimitSell(highest * 0.99);
+                    }
+                }
 
                 if (sHigh) {
                     sellSignal();
