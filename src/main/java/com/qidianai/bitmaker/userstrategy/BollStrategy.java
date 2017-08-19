@@ -235,10 +235,10 @@ public final class BollStrategy extends Strategy {
                 if (lastKline15m.closePrice > highest) {
                     highest = lastKline15m.closePrice;
 
-                    if (enterPrice >= highest * 0.993) {
-                        sellFactor = 0.993;
-                    } else if (enterPrice >= highest * 0.997) {
+                    if (enterPrice >= highest * 0.997) {
                         sellFactor = 0.997;
+                    } else if (enterPrice >= highest * 0.993) {
+                        sellFactor = 0.993;
                     } else {
                         sellFactor = 0.99;
                     }
