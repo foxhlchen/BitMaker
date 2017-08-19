@@ -234,13 +234,13 @@ public final class BollStrategy extends Strategy {
                 if (lastKline15m.closePrice > highest) {
                     highest = lastKline15m.closePrice;
 
-                    if (enterPrice >= highest * 0.993) {
-                        setLimitSell(highest * 0.993);
-                    } else if (enterPrice >= highest * 0.997) {
-                        setLimitSell(highest * 0.997);
-                    } else {
-                        setLimitSell(highest * 0.99);
-                    }
+//                    if (enterPrice >= highest * 0.993) {
+//                        setLimitSell(highest * 0.993);
+//                    } else if (enterPrice >= highest * 0.997) {
+//                        setLimitSell(highest * 0.997);
+//                    } else {
+//                        setLimitSell(highest * 0.99);
+//                    }
                 }
 
                 if (sHigh) {
