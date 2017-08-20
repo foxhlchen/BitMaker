@@ -211,8 +211,10 @@ public final class BollStrategy extends Strategy {
         double ma10 = this.ma.getMA("15min", 10);
         double percentMa = ma5 / ma10;
 
-        boolean bBandSize = bbandWidth > 0.02;
+        boolean bBandSize = bbandWidth > 0.01;
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
+        boolean bBandPosition2 = (lastKline15m.highPrice - bollband.getLowerBand("15min") ) /
+                (bollband.getUpperBand("15min") - bollband.getLowerBand("15min")) > 0.7;
         boolean bMA = percentMa > 1;
         boolean sMA = percentMa < 0.999;
 
@@ -220,7 +222,7 @@ public final class BollStrategy extends Strategy {
             case mkLower: {
                 highest = 0;
 
-                if (bBandSize && bBandPosition && bMA) {
+                if (bBandSize && (bBandPosition || bBandPosition2) && bMA) {
                     buySignal();
 
                     marketStatus = MarketStatus.mkHigher;
