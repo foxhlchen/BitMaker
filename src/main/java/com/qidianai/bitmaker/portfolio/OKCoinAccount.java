@@ -104,7 +104,7 @@ public class OKCoinAccount extends Account {
     public void buyMarketEth(double price) {
         log.warn("Buy eth (market) " + price);
 
-        String priceStr = String.format("%.6f", price);
+        String priceStr = String.format("%f", price);
         String amountStr = null;
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "buy_market");
@@ -114,7 +114,7 @@ public class OKCoinAccount extends Account {
         log.warn("Sell eth (market) "  + amount);
 
         String priceStr = null;
-        String amountStr = String.format("%.6f", amount);
+        String amountStr = String.format("%f", amount);
 
         okCoinClient.spotTrade("eth_cny", priceStr, amountStr, "sell_market");
     }
