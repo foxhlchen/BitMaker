@@ -215,7 +215,7 @@ public final class BollStrategy extends Strategy {
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
         boolean bBandPosition2 = (lastKline15m.highPrice - bollband.getLowerBand("15min") ) /
                 (bollband.getUpperBand("15min") - bollband.getLowerBand("15min")) > 0.7;
-        boolean bMA = percentMa > 1;
+        boolean bMA = percentMa > 1.001;
         boolean sMA = percentMa < 0.999;
 
         switch (marketStatus) {
@@ -232,25 +232,26 @@ public final class BollStrategy extends Strategy {
                 break;
             }
             case mkHigher: {
-                double sellFactor = 0.99;
+                double riskPrice = 0;
 
                 if (lastKline15m.closePrice > highest) {
                     highest = lastKline15m.closePrice;
-
-                    if (enterPrice >= highest * 0.997) {
-                        sellFactor = 0.997;
-                    } else if (enterPrice >= highest * 0.993) {
-                        sellFactor = 0.993;
-                    } else {
-                        sellFactor = 0.99;
-                    }
                 }
 
-                boolean sHigh = lastTick.last <= highest * sellFactor;
+                if (highest > enterPrice * 1.02) {
+                    riskPrice = enterPrice * 1.01;
+                } else if (highest > enterPrice * 1.01) {
+                    riskPrice = enterPrice * 1.005;
+                } else if (highest > enterPrice * 1.005) {
+                    riskPrice = enterPrice;
+                } else {
+                    riskPrice = enterPrice * 0.995;
+                }
 
-                if (sHigh) {
+                boolean sRisk = lastTick.last < riskPrice;
+
+                if (sRisk) {
                     sellSignal();
-                    highest = 0;
                 }
 
                 if (sMA) {
