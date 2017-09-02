@@ -233,9 +233,9 @@ public final class BollStrategy extends Strategy {
             }
             case mkHigher: {
                 double riskPrice = 0;
-                if (enterPrice == 0) {
-                    enterPrice = lastTick.last;
-                }
+//                if (enterPrice == 0) {
+//                    enterPrice = lastTick.last;
+//                }
 
 
                 if (lastKline15m.closePrice > highest) {
