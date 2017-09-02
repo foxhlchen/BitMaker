@@ -124,7 +124,8 @@ public class WebSocketHandler implements WebSocketService {
                 case "ok_sub_spotcny_eth_kline_1min":
                 case "ok_sub_spotcny_eth_kline_5min":
                 case "ok_sub_spotcny_eth_kline_15min":
-                case "ok_sub_spotcny_eth_kline_30min": {
+                case "ok_sub_spotcny_eth_kline_30min":
+                case "ok_sub_spotcny_eth_kline_day": {
                     //System.out.println(msg);
 
                     Type type = new TypeToken<JsonMsg<ArrayList<ArrayList<String>>>[]>() {
@@ -150,6 +151,10 @@ public class WebSocketHandler implements WebSocketService {
                             break;
                         case "ok_sub_spotcny_eth_kline_30min":
                             period = JsonKline.KlinePeriod.kLine30Min;
+
+                            break;
+                        case "ok_sub_spotcny_eth_kline_day":
+                            period = JsonKline.KlinePeriod.kLine1day;
 
                             break;
                     }

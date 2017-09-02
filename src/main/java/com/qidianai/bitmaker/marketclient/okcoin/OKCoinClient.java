@@ -111,6 +111,10 @@ public class OKCoinClient {
                 period = JsonKline.KlinePeriod.kLine30Min;
 
                 break;
+            case "day":
+                period = JsonKline.KlinePeriod.kLine1day;
+
+                break;
         }
 
         JsonKlineBatch batch = new JsonKlineBatch();
