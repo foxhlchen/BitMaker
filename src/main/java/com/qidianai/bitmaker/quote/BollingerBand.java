@@ -177,6 +177,7 @@ public class BollingerBand extends Quotation {
     protected BandQueue histKline30m = new BandQueue();
     protected BandQueue histKline1m = new BandQueue();
     protected BandQueue histKline5m = new BandQueue();
+    protected BandQueue histKline1day = new BandQueue();
     String tag;
     String namespace;
 
@@ -221,6 +222,10 @@ public class BollingerBand extends Quotation {
                     case kLine5Min:
                         histKline5m.pushKline(jsonKline);
 
+                    case kLine1day:
+                        histKline1day.pushKline(jsonKline);
+
+
                         break;
                 }
 
@@ -247,6 +252,10 @@ public class BollingerBand extends Quotation {
             case "5min":
                 price = histKline5m.getUpperBand();
 
+            case "1day":
+                price = histKline1day.getUpperBand();
+
+
                 break;
         }
 
@@ -271,6 +280,10 @@ public class BollingerBand extends Quotation {
                 break;
             case "5min":
                 price = histKline5m.getLowerBand();
+
+            case "1day":
+                price = histKline1day.getLowerBand();
+
 
                 break;
         }
@@ -297,6 +310,10 @@ public class BollingerBand extends Quotation {
 
             case "5min":
                 price = histKline5m.getAverage();
+
+            case "1day":
+                price = histKline1day.getAverage();
+
 
                 break;
         }
@@ -331,6 +348,7 @@ public class BollingerBand extends Quotation {
         histKline15m.updateBand();
         histKline30m.updateBand();
         histKline5m.updateBand();
+        histKline1day.updateBand();
     }
 
     @Override

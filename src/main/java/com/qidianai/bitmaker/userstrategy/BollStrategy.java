@@ -200,21 +200,21 @@ public final class BollStrategy extends Strategy {
 
     private void doTrade() {
         long nowSec = Calendar.getInstance().getTimeInMillis() / 1000;
-        double bband = bollband.getPercentB(lastTick.last, "15min");
-        double bbandMiddle = bollband.getMiddleBand("15min");
-        double bbandWidth = bollband.getBandWidth("15min");
+        double bband = bollband.getPercentB(lastTick.last, "1day");
+        double bbandMiddle = bollband.getMiddleBand("1day");
+        double bbandWidth = bollband.getBandWidth("1day");
 
-        double macd = this.macd.getMACD("15min");
-        double macdFast = this.macdFast.getMACD("15min");
+        double macd = this.macd.getMACD("1day");
+        double macdFast = this.macdFast.getMACD("1day");
 
-        double ma5 = this.ma.getMA("15min", 5);
-        double ma10 = this.ma.getMA("15min", 10);
+        double ma5 = this.ma.getMA("1day", 5);
+        double ma10 = this.ma.getMA("1day", 10);
         double percentMa = ma5 / ma10;
 
         boolean bBandSize = bbandWidth > 0.01;
         boolean bBandPosition = lastKline15m.closePrice > bbandMiddle && lastKline15m.openPrice > bbandMiddle;
-        boolean bBandPosition2 = (lastKline15m.highPrice - bollband.getLowerBand("15min") ) /
-                (bollband.getUpperBand("15min") - bollband.getLowerBand("15min")) > 0.7;
+        boolean bBandPosition2 = (lastKline15m.highPrice - bollband.getLowerBand("1day") ) /
+                (bollband.getUpperBand("1day") - bollband.getLowerBand("1day")) > 0.7;
         boolean bMA = percentMa > 1.001;
         boolean sMA = percentMa < 0.999;
 

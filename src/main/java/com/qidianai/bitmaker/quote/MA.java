@@ -116,6 +116,7 @@ public class MA extends Quotation {
     MAQueue maKline5m = new MAQueue();
     MAQueue maKline15m = new MAQueue();
     MAQueue maKline30m = new MAQueue();
+    MAQueue maKline1day = new MAQueue();
 
     private String tag;
     private String namespace;
@@ -138,6 +139,9 @@ public class MA extends Quotation {
                 break;
             case "5min":
                 macd = maKline5m.getMA(MAPeriod);
+
+            case "1day":
+                macd = maKline1day.getMA(MAPeriod);
 
                 break;
         }
@@ -163,6 +167,9 @@ public class MA extends Quotation {
                 break;
             case "5min":
                 macd = maKline5m.getMAVol(MAPeriod);
+
+            case "1day":
+                macd = maKline1day.getMAVol(MAPeriod);
 
                 break;
         }
@@ -216,6 +223,9 @@ public class MA extends Quotation {
                         maKline5m.pushKline(jsonKline);
 
                         break;
+
+                    case kLine1day:
+                        maKline1day.pushKline(jsonKline);
                 }
 
             });

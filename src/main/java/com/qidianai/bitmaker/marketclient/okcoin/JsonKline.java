@@ -20,6 +20,7 @@ public class JsonKline {
         kLine5Min,
         kLine15Min,
         kLine30Min,
+        kLine1day,
     }
 
     public class KlineDateTime {

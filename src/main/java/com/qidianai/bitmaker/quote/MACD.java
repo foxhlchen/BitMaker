@@ -143,6 +143,7 @@ public class MACD extends Quotation {
     HistQueue histKline30m = new HistQueue();
     HistQueue histKline1m = new HistQueue();
     HistQueue histKline5m = new HistQueue();
+    HistQueue histKline1day = new HistQueue();
     private String tag;
     private String namespace;
 
@@ -166,6 +167,10 @@ public class MACD extends Quotation {
                 macd = histKline5m.getMacd();
 
                 break;
+            case "1day":
+                macd = histKline1day.getMacd();
+
+                break;
         }
 
         return macd;
@@ -180,16 +185,19 @@ public class MACD extends Quotation {
         histKline5m.alpha_short = fast;
         histKline15m.alpha_short = fast;
         histKline30m.alpha_short = fast;
+        histKline1day.alpha_short = fast;
 
         histKline1m.alpha_long = slow;
         histKline5m.alpha_long = slow;
         histKline15m.alpha_long = slow;
         histKline30m.alpha_long = slow;
+        histKline1day.alpha_long = slow;
 
         histKline1m.alpha_dea = dea;
         histKline5m.alpha_dea = dea;
         histKline15m.alpha_dea = dea;
         histKline30m.alpha_dea = dea;
+        histKline1day.alpha_dea = dea;
 
     }
 
@@ -204,6 +212,7 @@ public class MACD extends Quotation {
         histKline5m.updateMACD();
         histKline15m.updateMACD();
         histKline30m.updateMACD();
+        histKline1day.updateMACD();
     }
 
     @Override
@@ -242,6 +251,8 @@ public class MACD extends Quotation {
                         histKline5m.pushKline(jsonKline);
 
                         break;
+                    case kLine1day:
+                        histKline1day.pushKline(jsonKline);
                 }
 
             });
